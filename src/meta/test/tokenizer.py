@@ -1,6 +1,6 @@
 import unittest
 
-from ..parser import *
+from ..tokenizer import *
 
 
 # test cases
@@ -21,7 +21,7 @@ class TestEvaluation(unittest.TestCase):
 
         sut = Tokenizer(text)
 
-        self.assertIsInstance(sut.next(), IdToken)
+        self.assertIsInstance(sut.next(), KeywordToken)
 
     def test_comments(self):
         text = """
