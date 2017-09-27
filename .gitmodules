@@ -1,0 +1,3 @@
+[submodule "3rd/pypy"]
+	path = 3rd/pypy
+	url = https://github.com/mozillazg/pypy
