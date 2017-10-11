@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// see http://lampwww.epfl.ch/teaching/archive/advanced_compiler/2007/resources/slides/act-2007-03-interpreters-vms_6.pdf
 void interpret(int limit) {
  int term = 0;
  goto is_done; /* jump to first instruction */

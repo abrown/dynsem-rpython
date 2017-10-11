@@ -56,32 +56,17 @@ class Tokenizer:
         self.file = file
         self.in_line_comment = False
         self.in_multiline_comment = False
-
-    def read(self):
-        if self.global_offset < len(self.text):
-            char = self.text[self.global_offset]
-            self.global_offset += 1
-            self.line_offset += 1
-            return char
-        else:
-            return ''
-
-    def peek(self):
-        if self.global_offset < len(self.text):
-            return self.text[self.global_offset]
-        else:
-            return ''
-
-    def unread(self):
-        self.global_offset -= 1
+        self.history = []
 
     def current_location(self):
         return Location(self.line_offset, self.line, self.file)
 
     def next(self):
+        """Retrieve the next token from the text"""
+        if len(self.history) > 0: return self.history.pop(0)
         token = None
         while not token:
-            c = self.read()
+            c = self.__read()
             if c == '':
                 if self.in_line_comment or self.in_multiline_comment:
                     raise TokenError("Unmatched open comment", self.line)
@@ -97,13 +82,13 @@ class Tokenizer:
             elif self.in_line_comment:
                 continue
             elif self.in_multiline_comment:
-                if c == '*' and self.peek() == '/':
-                    self.read()  # eliminate the /
+                if c == '*' and self.__peek() == '/':
+                    self.__read()  # eliminate the /
                     self.in_multiline_comment = False
-            elif c == '/' and self.peek() == '/':
-                self.read()  # eliminate the /
+            elif c == '/' and self.__peek() == '/':
+                self.__read()  # eliminate the /
                 self.in_line_comment = True
-            elif c == '/' and self.peek() == '*':
+            elif c == '/' and self.__peek() == '*':
                 self.in_multiline_comment = True
             # white space
             elif is_whitespace(c):
@@ -122,27 +107,51 @@ class Tokenizer:
             # IDs and keywords
             elif is_id_char(c):
                 location = self.current_location()
-                value = self.read_all_of(c, is_id_char)
+                value = self.__read_all_of(c, lambda c: is_id_char(c) or is_number_char(c))
                 token = KeywordToken(location, value) if is_keyword(value) else IdToken(location, value)
             # operators
             elif is_operator_char(c):
                 location = self.current_location()
-                value = self.read_all_of(c, is_operator_char)
+                value = self.__read_all_of(c, is_operator_char)
                 token = OperatorToken(location, value)
             # numbers
             elif is_number_char(c):
                 location = self.current_location()
-                value = self.read_all_of(c, is_number_char)
+                value = self.__read_all_of(c, is_number_char)
                 token = NumberToken(location, value)
             else:
                 raise TokenError('Invalid character: ' + c, self.current_location())
 
         return token
 
-    def read_all_of(self, value, match_function):
-        c = self.read()
-        while match_function(c):
+    def undo(self, token):
+        """Undo the last next operation"""
+        if not isinstance(token, Token):
+            raise ValueError("Attempted to undo a non-token")
+        self.history.append(token)
+
+    def __read(self):
+        if self.global_offset < len(self.text):
+            char = self.text[self.global_offset]
+            self.global_offset += 1
+            self.line_offset += 1
+            return char
+        else:
+            return ''
+
+    def __peek(self):
+        if self.global_offset < len(self.text):
+            return self.text[self.global_offset]
+        else:
+            return ''
+
+    def __unread(self):
+        self.global_offset -= 1
+
+    def __read_all_of(self, value, match_function):
+        c = self.__read()
+        while c != '' and match_function(c):
             value += c
-            c = self.read()
-        self.unread()
+            c = self.__read()
+        if c != '': self.__unread()
         return value

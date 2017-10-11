@@ -77,5 +77,17 @@ class TestEvaluation(unittest.TestCase):
         self.assertIsInstance(tokens[15], RightBraceToken)
         self.assertIsInstance(tokens[16], EofToken)
 
+    def test_paths_with_numbers(self):
+        # must start with a letter
+        text = "a/b/c/1"
+        sut = Tokenizer(text)
+
+        token = sut.next()
+        eof = sut.next()
+
+        self.assertIsInstance(token, IdToken)
+        self.assertEqual(token.value, "a/b/c/1")
+        self.assertIsInstance(eof, EofToken)
+
 if __name__ == '__main__':
     unittest.main()
