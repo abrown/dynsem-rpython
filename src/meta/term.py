@@ -24,10 +24,10 @@ class Term:
 
 
 class ApplTerm(Term):
-    def __init__(self, name, args):
+    def __init__(self, name, args=None):
         Term.__init__(self, Term.APPL)
         self.name = name
-        self.args = args
+        self.args = args if not args is None else []
 
     def __str__(self):
         return self.name if not self.args else "%s(%s)" % (self.name, self.args)

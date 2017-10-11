@@ -43,7 +43,7 @@ class Parser:
                 self.module.imports = [t.value for t in self.__collect(IdToken)]
             elif keyword == "rules":
                 while True:
-                    before = self.__attempt_term()
+                    before = self.parse_term()
                     if before is None: break;
                     self.__expect_value(OperatorToken, "-->")
                     after = self.__expect_term()
@@ -85,7 +85,7 @@ class Parser:
 
     def __expect_value(self, type, expected=None):
         token = self.__expect(type)
-        if expected and token.value is not expected:
+        if expected and token.value != expected:
             raise ParseError("Expected a token with value {} but found: ".format(expected), token.value)
 
 
@@ -188,26 +188,31 @@ class Parser:
 
     def __possible(self, type):
         token = self.tokenizer.next()
-        return token if isinstance(token, type) else None
+        if isinstance(token, type):
+            return token
+        else:
+            self.tokenizer.undo(token)
+            return None
 
     def __possible_value(self, type, expected):
         token = self.__possible(type)
-        return token if expected and token.value is not expected else None
+        return token if token and expected and token.value is not expected else None
 
-    def __attempt_term(self):
+    def parse_term(self):
         token = self.tokenizer.next()
         if isinstance(token, IdToken):
             return self.__parse_appl(token)
         elif isinstance(token, NumberToken):
             return IntTerm(token.value)
         else:
+            self.tokenizer.undo(token)
             return None
 
     def __parse_appl(self, id):
         args = []
         if not self.__possible(LeftParensToken) is None:
             while True:
-                arg = self.__attempt_term()
+                arg = self.parse_term()
                 if arg is None: break
                 args.append(arg)
                 self.__possible(CommaToken)
@@ -215,7 +220,7 @@ class Parser:
         return ApplTerm(id.value, args)
 
     def __expect_term(self):
-        term = self.__attempt_term()
+        term = self.parse_term()
         if term is None:
             raise ParseError("Failed to parse a term", None)
         return term

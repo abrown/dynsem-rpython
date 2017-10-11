@@ -35,11 +35,18 @@ class TestEvaluation(unittest.TestCase):
 
         self.assertEqual(len(sut.all().imports), 2)
 
+    def test_terms(self):
+        text = """a(x, y)"""
+        sut = Parser(Tokenizer(text))
+
+        term = sut.parse_term()
+
+        self.assertEqual(ApplTerm("a", [ApplTerm("x"), ApplTerm("y")]), term)
+
     def test_parentheses(self):
         text = """
         rules
             Lit(s) --> NumV(parseI(s))
-            
             Plus(NumV(a), NumV(b)) --> NumV(addI(a, b))
         """
         sut = Parser(Tokenizer(text))
@@ -47,17 +54,18 @@ class TestEvaluation(unittest.TestCase):
         module = sut.all()
 
         self.assertEqual(2, len(module.rules))
-        self.assertEqual(ApplTerm("Lit", [ApplTerm("s", [])]), module.rules[0].before)
+        self.assertEqual(ApplTerm("Lit", [ApplTerm("s")]), module.rules[0].before)
+        self.assertEqual(ApplTerm("NumV", [ApplTerm("addI", [ApplTerm("a"), ApplTerm("b")])]), module.rules[1].after)
 
 
-    def test_rules(self):
-        text = "E |- bindVar(x, v) --> {x |--> v, E}"
-        sut = Tokenizer(text)
-
-        tokens = [sut.next() for i in range(17)]
-
-        self.assertIsInstance(tokens[15], RightBraceToken)
-        self.assertIsInstance(tokens[16], EofToken)
+    # def test_rules(self):
+    #     text = "E |- bindVar(x, v) --> {x |--> v, E}"
+    #     sut = Tokenizer(text)
+    #
+    #     tokens = [sut.next() for i in range(17)]
+    #
+    #     self.assertIsInstance(tokens[15], RightBraceToken)
+    #     self.assertIsInstance(tokens[16], EofToken)
 
 if __name__ == '__main__':
     unittest.main()
