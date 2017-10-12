@@ -1,6 +1,7 @@
 from .tokenizer import *
 from .term import *
 
+
 class Module:
     name = ""
     imports = []
@@ -28,8 +29,8 @@ class ParseError(Exception):
 
 
 class Parser:
-    def __init__(self, tokenizer):
-        self.tokenizer = tokenizer
+    def __init__(self, text):
+        self.tokenizer = Tokenizer(text)
         self.module = Module()
 
     def parse(self):

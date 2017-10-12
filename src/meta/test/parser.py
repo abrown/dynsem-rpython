@@ -1,6 +1,5 @@
 import unittest
 
-from ..tokenizer import *
 from ..parser import *
 
 
@@ -20,7 +19,7 @@ class TestEvaluation(unittest.TestCase):
         module trans/runtime/environment
         """
 
-        sut = Parser(Tokenizer(text))
+        sut = Parser(text)
 
         self.assertEqual(sut.all().name, "trans/runtime/environment")
 
@@ -31,13 +30,13 @@ class TestEvaluation(unittest.TestCase):
             trans/runtime/b
         """
 
-        sut = Parser(Tokenizer(text))
+        sut = Parser(text)
 
         self.assertEqual(len(sut.all().imports), 2)
 
     def test_terms(self):
         text = """a(x, y)"""
-        sut = Parser(Tokenizer(text))
+        sut = Parser(text)
 
         term = sut.parse_term()
 
@@ -49,7 +48,7 @@ class TestEvaluation(unittest.TestCase):
             Lit(s) --> NumV(parseI(s))
             Plus(NumV(a), NumV(b)) --> NumV(addI(a, b))
         """
-        sut = Parser(Tokenizer(text))
+        sut = Parser(text)
 
         module = sut.all()
 

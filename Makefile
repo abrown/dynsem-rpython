@@ -7,7 +7,7 @@ all: test
 	git submodule update
 
 test:
-	python src/test.py
+	python -m unittest discover -s src/meta/test -p "*.py" -t .
 
 attempt:
 	python ${RPYTHON} --log --output=bin/attempt src/meta/attempt.py
