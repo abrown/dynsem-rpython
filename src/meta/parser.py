@@ -1,6 +1,7 @@
 from .dynsem import *
-from .tokenizer import *
 from .term import *
+from .tokenizer import *
+
 
 class ParseError(Exception):
     def __init__(self, reason, token):

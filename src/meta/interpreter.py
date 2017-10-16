@@ -1,6 +1,7 @@
 from .dynsem import *
 from .term import *
 
+
 class InterpreterError(Exception):
     def __init__(self, reason):
         self.reason = reason
@@ -46,7 +47,6 @@ class Interpreter:
         elif isinstance(pattern, ApplTerm):
             for (term_arg, pattern_arg) in zip(term.args, pattern.args):
                 Interpreter.bind(term_arg, pattern_arg, context)
-
 
     @staticmethod
     def resolve(term, context):

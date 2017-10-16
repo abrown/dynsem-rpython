@@ -1,6 +1,3 @@
-import sys # for print
-
-
 class Exp:
     _immutable_fields_ = ['next', 'code', 'index']
 
