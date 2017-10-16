@@ -1,5 +1,5 @@
-from meta.dynsem import *
-
+from .dynsem import *
+from .term import *
 
 class InterpreterError(Exception):
     def __init__(self, reason):

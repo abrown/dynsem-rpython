@@ -47,11 +47,11 @@ class TestParser(unittest.TestCase):
         """
         sut = Parser(text)
 
-        module = sut.all()
+        mod = sut.all()
 
-        self.assertEqual(2, len(module.rules))
-        self.assertEqual(ApplTerm("Lit", [VarTerm("s")]), module.rules[0].before)
-        self.assertEqual(ApplTerm("NumV", [ApplTerm("addI", [VarTerm("a"), VarTerm("b")])]), module.rules[1].after)
+        self.assertEqual(2, len(mod.rules))
+        self.assertEqual(ApplTerm("Lit", [VarTerm("s")]), mod.rules[0].before)
+        self.assertEqual(ApplTerm("NumV", [ApplTerm("addI", [VarTerm("a"), VarTerm("b")])]), mod.rules[1].after)
 
 
 if __name__ == '__main__':

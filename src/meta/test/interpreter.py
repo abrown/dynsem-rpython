@@ -1,12 +1,12 @@
 import unittest
 
-from meta.dynsem import *
-from meta.interpreter import Interpreter
-from meta.parser import Parser
+from ..dynsem import *
+from ..interpreter import Interpreter
+from ..parser import Parser
 
 
 class TestInterpreter(unittest.TestCase):
-    def test_header(self):
+    def test_one_transformation(self):
         mod = Module()
         mod.rules.append(Rule(Parser.term("a(x)"), Parser.term("b"), [Parser.premise("x == 1")]))
         term = Parser.term("a(1)")

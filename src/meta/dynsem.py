@@ -1,15 +1,13 @@
-from .term import *
-
-
 class Module:
-    name = ""
-    imports = []
-    sorts = []
-    constructors = []
-    arrows = []
-    components = []
-    nativeOperators = []
-    rules = []
+    def __init__(self):
+        self.name = ""
+        self.imports = []
+        self.sorts = []
+        self.constructors = []
+        self.arrows = []
+        self.components = []
+        self.nativeOperators = []
+        self.rules = []
 
 
 class Rule:

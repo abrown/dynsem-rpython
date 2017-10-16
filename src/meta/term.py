@@ -15,6 +15,9 @@ class Term:
     def __str__(self):
         return self.__class__.__name__
 
+    def __repr__(self):
+        return self.__str__()
+
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
