@@ -1,5 +1,6 @@
 import unittest
-from ..interpreter import *
+
+from example.interpreter import *
 
 
 # test cases

@@ -1,3 +1,6 @@
+from .parser import Parser  # only for Term.of convenience method
+
+
 class Term:
     INT = 0
     REAL = 1
@@ -21,6 +24,10 @@ class Term:
         if isinstance(other, self.__class__):
             return not self.__eq__(other)
         return NotImplemented
+
+    @staticmethod
+    def of(text):
+        return Parser(text).parse_term()
 
 
 class ApplTerm(Term):

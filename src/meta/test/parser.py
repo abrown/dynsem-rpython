@@ -21,7 +21,7 @@ class TestEvaluation(unittest.TestCase):
 
         sut = Parser(text)
 
-        self.assertEqual(sut.all().name, "trans/runtime/environment")
+        self.assertEqual(sut.parse_all().name, "trans/runtime/environment")
 
     def test_comments(self):
         text = """
@@ -32,7 +32,7 @@ class TestEvaluation(unittest.TestCase):
 
         sut = Parser(text)
 
-        self.assertEqual(len(sut.all().imports), 2)
+        self.assertEqual(len(sut.parse_all().imports), 2)
 
     def test_terms(self):
         text = """a(x, y)"""
@@ -50,7 +50,7 @@ class TestEvaluation(unittest.TestCase):
         """
         sut = Parser(text)
 
-        module = sut.all()
+        module = sut.parse_all()
 
         self.assertEqual(2, len(module.rules))
         self.assertEqual(ApplTerm("Lit", [ApplTerm("s")]), module.rules[0].before)

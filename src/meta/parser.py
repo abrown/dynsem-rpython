@@ -1,25 +1,5 @@
 from .tokenizer import *
-from .term import *
-
-
-class Module:
-    name = ""
-    imports = []
-    sorts = []
-    constructors = []
-    arrows = []
-    components = []
-    nativeOperators = []
-    rules = []
-
-
-class Rule:
-    def __init__(self, before, after, premises=None):
-        if premises is None:
-            premises = []
-        self.premises = premises
-        self.before = before
-        self.after = after
+from .dynsem import *
 
 
 class ParseError(Exception):
@@ -33,7 +13,7 @@ class Parser:
         self.tokenizer = Tokenizer(text)
         self.module = Module()
 
-    def parse(self):
+    def parse_next(self):
         """Parse one token and update the Module"""
         token = self.tokenizer.next()
         if isinstance(token, KeywordToken):
@@ -61,10 +41,10 @@ class Parser:
         else:
             raise ParseError("Unexpected token", token)
 
-    def all(self):
+    def parse_all(self):
         """Parse all tokens into a Module and return it"""
         while True:
-            last = self.parse()
+            last = self.parse_next()
             if last is None: break
         return self.module
 
