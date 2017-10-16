@@ -1,5 +1,5 @@
-from .tokenizer import *
 from .dynsem import *
+from .tokenizer import *
 
 
 class ParseError(Exception):
@@ -14,14 +14,16 @@ class Parser:
         self.module = Module()
 
     @staticmethod
-    def parse_term(text):
+    def term(text):
+        """Helper method for parsing a single term"""
         return Parser(text).__parse_term()
 
     @staticmethod
-    def parse_premise(text):
+    def premise(text):
+        """Helper method for parsing a single premise"""
         return Parser(text).__parse_premise()
 
-    def parse_next(self):
+    def next(self):
         """Parse one token and update the Module"""
         token = self.tokenizer.next()
         if isinstance(token, KeywordToken):
@@ -50,10 +52,10 @@ class Parser:
         else:
             raise ParseError("Unexpected token", token)
 
-    def parse_all(self):
+    def all(self):
         """Parse all tokens into a Module and return it"""
         while True:
-            last = self.parse_next()
+            last = self.next()
             if last is None: break
         return self.module
 
@@ -93,23 +95,25 @@ class Parser:
     def __parse_term(self):
         token = self.tokenizer.next()
         if isinstance(token, IdToken):
-            return self.__parse_appl(token)
+            return self.__parse_identifier(token)
         elif isinstance(token, NumberToken):
             return IntTerm(token.value)
         else:
             self.tokenizer.undo(token)
             return None
 
-    def __parse_appl(self, id):
-        args = []
-        if not self.__possible(LeftParensToken) is None:
+    def __parse_identifier(self, id):
+        if self.__possible(LeftParensToken):
+            args = []
             while True:
                 arg = self.__parse_term()
                 if arg is None: break
                 args.append(arg)
                 self.__possible(CommaToken)
             self.__expect(RightParensToken)
-        return ApplTerm(id.value, args)
+            return ApplTerm(id.value, args)
+        else:
+            return VarTerm(id.value)
 
     def __expect_term(self):
         term = self.__parse_term()

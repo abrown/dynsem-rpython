@@ -1,15 +1,14 @@
 import unittest
-from ..transform import *
-from ..dynsem import *
+
 from ..parser import *
+from ..transform import *
 
 
 class TestTransform(unittest.TestCase):
-
     def test_header(self):
         sut = Module()
-        sut.rules.append(Rule(Parser.parse_term("a"), Parser.parse_term("b"), [Parser.parse_premise("a == 1")]))
-        sut.rules.append(Rule(Parser.parse_term("a"), Parser.parse_term("b"), [Parser.parse_premise("a == 2")]))
+        sut.rules.append(Rule(Parser.term("a"), Parser.term("b"), [Parser.premise("a == 1")]))
+        sut.rules.append(Rule(Parser.term("a"), Parser.term("b"), [Parser.premise("a == 2")]))
 
         sut = transform(sut)
 

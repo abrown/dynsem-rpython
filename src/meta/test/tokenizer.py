@@ -3,9 +3,7 @@ import unittest
 from ..tokenizer import *
 
 
-# test cases
-class TestEvaluation(unittest.TestCase):
-
+class TestTokenizer(unittest.TestCase):
     def assertTokensEqual(self, expected, actual):
         if len(expected) is not len(actual):
             raise AssertionError("Lengths do not match: {} != {}".format(expected, actual))
@@ -88,6 +86,7 @@ class TestEvaluation(unittest.TestCase):
         self.assertIsInstance(token, IdToken)
         self.assertEqual(token.value, "a/b/c/1")
         self.assertIsInstance(eof, EofToken)
+
 
 if __name__ == '__main__':
     unittest.main()
