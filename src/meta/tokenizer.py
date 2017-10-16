@@ -26,7 +26,9 @@ class LeftParensToken(Token): pass
 class RightParensToken(Token): pass
 class LeftBraceToken(Token): pass
 class RightBraceToken(Token): pass
+class PeriodToken(Token): pass
 class CommaToken(Token): pass
+class SemiColonToken(Token): pass
 # TODO path token?
 
 
@@ -104,6 +106,10 @@ class Tokenizer:
                 token = RightBraceToken(self.current_location())
             elif c == ',':
                 token = CommaToken(self.current_location())
+            elif c == ';':
+                token = SemiColonToken(self.current_location())
+            elif c == '.':
+                token = PeriodToken(self.current_location())
             # IDs and keywords
             elif is_id_char(c):
                 location = self.current_location()

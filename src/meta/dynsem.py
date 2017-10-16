@@ -36,17 +36,6 @@ class Premise:
             return not self.__eq__(other)
         return NotImplemented
 
-    @staticmethod
-    def of(text):
-        if "==" in text:
-            left, right = text.split("==")
-            return EqualityCheckPremise(Term.of(left), Term.of(right))
-        elif "=>" in text:
-            left, right = text.split("=>")
-            return PatternMatchPremise(Term.of(left), Term.of(right))
-        else:
-            raise NotImplementedError()
-
 
 class PatternMatchPremise(Premise):
     def __init__(self, left, right):

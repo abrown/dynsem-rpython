@@ -36,9 +36,8 @@ class TestEvaluation(unittest.TestCase):
 
     def test_terms(self):
         text = """a(x, y)"""
-        sut = Parser(text)
 
-        term = sut.parse_term()
+        term = Parser.parse_term(text)
 
         self.assertEqual(ApplTerm("a", [ApplTerm("x"), ApplTerm("y")]), term)
 
