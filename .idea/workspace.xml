@@ -26,8 +26,10 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/meta/dynsem.py" afterPath="$PROJECT_DIR$/src/meta/dynsem.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/meta/parser.py" afterPath="$PROJECT_DIR$/src/meta/parser.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/meta/term.py" afterPath="$PROJECT_DIR$/src/meta/term.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/meta/test/interpreter.py" afterPath="$PROJECT_DIR$/src/meta/test/interpreter.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/meta/test/parser.py" afterPath="$PROJECT_DIR$/src/meta/test/parser.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/meta/tokenizer.py" afterPath="$PROJECT_DIR$/src/meta/tokenizer.py" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -45,8 +47,44 @@
       <file leaf-file-name="dynsem.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/meta/dynsem.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="43">
-              <caret line="23" column="24" lean-forward="false" selection-start-line="23" selection-start-column="24" selection-end-line="23" selection-end-column="24" />
+            <state relative-caret-position="341">
+              <caret line="73" column="6" lean-forward="false" selection-start-line="73" selection-start-column="6" selection-end-line="73" selection-end-column="6" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="parser.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/meta/test/parser.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="83">
+              <caret line="47" column="78" lean-forward="false" selection-start-line="47" selection-start-column="78" selection-end-line="47" selection-end-column="78" />
+              <folding>
+                <element signature="e#0#15#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="parser.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/meta/parser.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="201">
+              <caret line="96" column="43" lean-forward="false" selection-start-line="96" selection-start-column="43" selection-end-line="96" selection-end-column="43" />
+              <folding>
+                <element signature="e#0#21#0" expanded="true" />
+                <element signature="e#1788#2025#0" expanded="false" />
+                <element signature="e#2303#2484#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="tokenizer.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/meta/tokenizer.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="54">
+              <caret line="45" column="117" lean-forward="false" selection-start-line="45" selection-start-column="117" selection-end-line="45" selection-end-column="117" />
               <folding />
             </state>
           </provider>
@@ -55,49 +93,9 @@
       <file leaf-file-name="term.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/meta/term.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="42" column="0" lean-forward="false" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+            <state relative-caret-position="233">
+              <caret line="29" column="0" lean-forward="true" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="parser.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/meta/parser.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="127">
-              <caret line="42" column="0" lean-forward="false" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#21#0" expanded="true" />
-                <element signature="e#1788#2025#0" expanded="false" />
-                <element signature="e#2065#2242#0" expanded="false" />
-                <element signature="e#2303#2484#0" expanded="false" />
-                <element signature="e#2751#2865#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="interpreter.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/meta/test/interpreter.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="21" column="43" lean-forward="false" selection-start-line="21" selection-start-column="43" selection-end-line="21" selection-end-column="43" />
-              <folding>
-                <element signature="e#0#15#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="parser.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/meta/test/parser.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="198">
-              <caret line="45" column="0" lean-forward="true" selection-start-line="45" selection-start-column="0" selection-end-line="45" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#15#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -143,17 +141,17 @@
         <option value="$PROJECT_DIR$/src/benchmark/labels.c" />
         <option value="$PROJECT_DIR$/Makefile" />
         <option value="$PROJECT_DIR$/.gitignore" />
-        <option value="$PROJECT_DIR$/src/meta/tokenizer.py" />
         <option value="$PROJECT_DIR$/src/meta/transform.py" />
         <option value="$PROJECT_DIR$/src/meta/test/transform.py" />
         <option value="$PROJECT_DIR$/src/meta/test/tokenizer.py" />
         <option value="$PROJECT_DIR$/src/meta/test/term.py" />
         <option value="$PROJECT_DIR$/src/meta/interpreter.py" />
-        <option value="$PROJECT_DIR$/src/meta/parser.py" />
+        <option value="$PROJECT_DIR$/src/meta/tokenizer.py" />
+        <option value="$PROJECT_DIR$/src/meta/test/interpreter.py" />
         <option value="$PROJECT_DIR$/src/meta/dynsem.py" />
         <option value="$PROJECT_DIR$/src/meta/term.py" />
+        <option value="$PROJECT_DIR$/src/meta/parser.py" />
         <option value="$PROJECT_DIR$/src/meta/test/parser.py" />
-        <option value="$PROJECT_DIR$/src/meta/test/interpreter.py" />
       </list>
     </option>
   </component>
@@ -292,7 +290,7 @@
       <option name="_new_target" value="&quot;$PROJECT_DIR$/src/meta/test&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
     </configuration>
-    <configuration name="Unittests in interpreter.py" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for parser.TestParser.test_rules" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs />
@@ -303,8 +301,8 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="dynsem-rpython" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/src/meta/test/interpreter.py&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <option name="_new_target" value="&quot;parser.TestParser.test_rules&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
     </configuration>
     <configuration name="Unittests in parser.py" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -432,17 +430,17 @@
       <item index="0" class="java.lang.String" itemvalue="Makefile.Make attempt" />
       <item index="1" class="java.lang.String" itemvalue="Python.attempt" />
       <item index="2" class="java.lang.String" itemvalue="Python tests.Run all tests" />
-      <item index="3" class="java.lang.String" itemvalue="Python tests.Unittests in interpreter.py" />
-      <item index="4" class="java.lang.String" itemvalue="Python tests.Unittests in tokenizer.py" />
-      <item index="5" class="java.lang.String" itemvalue="Python tests.Unittests in parser.py" />
+      <item index="3" class="java.lang.String" itemvalue="Python tests.Unittests in tokenizer.py" />
+      <item index="4" class="java.lang.String" itemvalue="Python tests.Unittests in parser.py" />
+      <item index="5" class="java.lang.String" itemvalue="Python tests.Unittests for parser.TestParser.test_rules" />
     </list>
     <recent_temporary>
       <list size="5">
         <item index="0" class="java.lang.String" itemvalue="Python tests.Run all tests" />
-        <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests in parser.py" />
-        <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests in tokenizer.py" />
-        <item index="3" class="java.lang.String" itemvalue="Python.attempt" />
-        <item index="4" class="java.lang.String" itemvalue="Python tests.Unittests in interpreter.py" />
+        <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests for parser.TestParser.test_rules" />
+        <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests in parser.py" />
+        <item index="3" class="java.lang.String" itemvalue="Python tests.Unittests in tokenizer.py" />
+        <item index="4" class="java.lang.String" itemvalue="Python.attempt" />
       </list>
     </recent_temporary>
   </component>
@@ -476,34 +474,34 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="Run_all_tests - 2017.10.16 at 20h 21m 33s.xml">
+    <history-entry file="Run_all_tests - 2017.10.16 at 20h 57m 03s.xml">
       <configuration name="Run all tests" configurationId="tests" />
     </history-entry>
-    <history-entry file="Run_all_tests - 2017.10.16 at 20h 22m 23s.xml">
+    <history-entry file="Run_all_tests - 2017.10.16 at 20h 58m 52s.xml">
       <configuration name="Run all tests" configurationId="tests" />
     </history-entry>
-    <history-entry file="Run_all_tests - 2017.10.16 at 20h 22m 35s.xml">
+    <history-entry file="Run_all_tests - 2017.10.16 at 20h 59m 08s.xml">
       <configuration name="Run all tests" configurationId="tests" />
     </history-entry>
-    <history-entry file="Run_all_tests - 2017.10.16 at 20h 23m 01s.xml">
+    <history-entry file="Run_all_tests - 2017.10.16 at 20h 59m 19s.xml">
       <configuration name="Run all tests" configurationId="tests" />
     </history-entry>
-    <history-entry file="Run_all_tests - 2017.10.16 at 20h 24m 07s.xml">
+    <history-entry file="Run_all_tests - 2017.10.16 at 20h 59m 35s.xml">
       <configuration name="Run all tests" configurationId="tests" />
     </history-entry>
-    <history-entry file="Run_all_tests - 2017.10.16 at 20h 24m 24s.xml">
+    <history-entry file="Run_all_tests - 2017.10.16 at 20h 59m 55s.xml">
       <configuration name="Run all tests" configurationId="tests" />
     </history-entry>
-    <history-entry file="Run_all_tests - 2017.10.16 at 20h 24m 39s.xml">
+    <history-entry file="Run_all_tests - 2017.10.16 at 21h 00m 53s.xml">
       <configuration name="Run all tests" configurationId="tests" />
     </history-entry>
-    <history-entry file="Run_all_tests - 2017.10.16 at 20h 24m 55s.xml">
+    <history-entry file="Run_all_tests - 2017.10.16 at 21h 02m 40s.xml">
       <configuration name="Run all tests" configurationId="tests" />
     </history-entry>
-    <history-entry file="Run_all_tests - 2017.10.16 at 20h 26m 05s.xml">
+    <history-entry file="Run_all_tests - 2017.10.16 at 21h 02m 41s.xml">
       <configuration name="Run all tests" configurationId="tests" />
     </history-entry>
-    <history-entry file="Run_all_tests - 2017.10.16 at 20h 26m 25s.xml">
+    <history-entry file="Run_all_tests - 2017.10.16 at 21h 03m 03s.xml">
       <configuration name="Run all tests" configurationId="tests" />
     </history-entry>
   </component>
@@ -560,13 +558,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/meta/test/parser.py</url>
-          <line>46</line>
-          <option name="timeStamp" value="23" />
-        </line-breakpoint>
-      </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
@@ -577,7 +568,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="25" />
+      <option name="time" value="28" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -863,29 +854,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/meta/tokenizer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="78">
-          <caret line="28" column="12" lean-forward="false" selection-start-line="28" selection-start-column="12" selection-end-line="28" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/meta/transform.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="48">
           <caret line="2" column="0" lean-forward="true" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/meta/test/tokenizer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="48">
-          <caret line="4" column="0" lean-forward="true" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#15#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -903,6 +876,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="233">
           <caret line="3943" column="6" lean-forward="false" selection-start-line="3943" selection-start-column="6" selection-end-line="3943" selection-end-column="6" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -918,16 +892,6 @@
         <state relative-caret-position="528">
           <caret line="24" column="37" lean-forward="false" selection-start-line="24" selection-start-column="35" selection-end-line="24" selection-end-column="37" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/meta/interpreter.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5">
-          <caret line="8" column="0" lean-forward="true" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -947,50 +911,74 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/meta/term.py">
+    <entry file="file://$PROJECT_DIR$/src/meta/test/tokenizer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="42" column="0" lean-forward="false" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+        <state relative-caret-position="-312">
+          <caret line="4" column="0" lean-forward="true" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/meta/parser.py">
+    <entry file="file://$PROJECT_DIR$/src/meta/interpreter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="127">
-          <caret line="42" column="0" lean-forward="false" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+        <state relative-caret-position="216">
+          <caret line="9" column="6" lean-forward="false" selection-start-line="9" selection-start-column="6" selection-end-line="9" selection-end-column="6" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
-            <element signature="e#1788#2025#0" expanded="false" />
-            <element signature="e#2065#2242#0" expanded="false" />
-            <element signature="e#2303#2484#0" expanded="false" />
-            <element signature="e#2751#2865#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/meta/dynsem.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="43">
-          <caret line="23" column="24" lean-forward="false" selection-start-line="23" selection-start-column="24" selection-end-line="23" selection-end-column="24" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/meta/test/parser.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="45" column="0" lean-forward="true" selection-start-line="45" selection-start-column="0" selection-end-line="45" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/meta/test/interpreter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="21" column="43" lean-forward="false" selection-start-line="21" selection-start-column="43" selection-end-line="21" selection-end-column="43" />
+        <state relative-caret-position="119">
+          <caret line="34" column="84" lean-forward="false" selection-start-line="34" selection-start-column="84" selection-end-line="34" selection-end-column="84" />
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/meta/term.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="233">
+          <caret line="29" column="0" lean-forward="true" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/meta/dynsem.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="341">
+          <caret line="73" column="6" lean-forward="false" selection-start-line="73" selection-start-column="6" selection-end-line="73" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/meta/tokenizer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="45" column="117" lean-forward="false" selection-start-line="45" selection-start-column="117" selection-end-line="45" selection-end-column="117" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/meta/parser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="201">
+          <caret line="96" column="43" lean-forward="false" selection-start-line="96" selection-start-column="43" selection-end-line="96" selection-end-column="43" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+            <element signature="e#1788#2025#0" expanded="false" />
+            <element signature="e#2303#2484#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/meta/test/parser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="83">
+          <caret line="47" column="78" lean-forward="false" selection-start-line="47" selection-start-column="78" selection-end-line="47" selection-end-column="78" />
           <folding>
             <element signature="e#0#15#0" expanded="true" />
           </folding>

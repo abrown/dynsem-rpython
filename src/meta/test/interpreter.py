@@ -1,7 +1,7 @@
 import unittest
 
 from ..dynsem import *
-from ..interpreter import Interpreter
+from ..interpreter import *
 from ..parser import Parser
 
 
@@ -25,6 +25,14 @@ class TestInterpreter(unittest.TestCase):
         result = Interpreter.interpret(mod, term)
 
         self.assertEqual(result, Parser.term("d()"))
+
+    def test_invalid_premise(self):
+        mod = Module()
+        mod.rules.append(Parser.rule("a() --> b() where 1 == 2"))
+        term = Parser.term("a()")
+
+        with self.assertRaises(InterpreterError):
+            Interpreter.interpret(mod, term) # does not know where to go when 1 != 2
 
 
 if __name__ == '__main__':

@@ -33,14 +33,14 @@ class ApplTerm(Term):
     def __init__(self, name, args=None):
         Term.__init__(self, Term.APPL)
         self.name = name
-        self.args = args if not args is None else []
+        self.args = args if args else []
 
     def matches(self, term):
         return self.type == term.type and self.name == term.name and len(self.args) == len(term.args) \
                and all(map(lambda ab: ab[0].matches(ab[1]), zip(self.args, term.args)))
 
     def __str__(self):
-        return self.name if not self.args else "%s(%s)" % (self.name, self.args)
+        return self.name if not self.args else "%s(%s)" % (self.name, ", ".join(map(str, self.args)))
 
 
 class IntTerm(Term):

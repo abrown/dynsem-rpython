@@ -87,14 +87,14 @@ class Parser:
 
     def __possible_value(self, type, expected):
         token = self.__possible(type)
-        return token if token and expected and token.value is not expected else None
+        return token if token and expected and token.value == expected else None
 
     def __parse_term(self):
         token = self.tokenizer.next()
         if isinstance(token, IdToken):
             return self.__parse_identifier(token)
         elif isinstance(token, NumberToken):
-            return IntTerm(token.value)
+            return IntTerm(int(token.value))
         else:
             self.tokenizer.undo(token)
             return None
@@ -141,6 +141,6 @@ class Parser:
                 premise = self.__parse_premise()
                 rule.premises.append(premise)
                 if not self.__possible(SemiColonToken): break
-            self.__expect(PeriodToken)
+            self.__possible(PeriodToken)
 
         return rule

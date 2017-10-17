@@ -40,11 +40,14 @@ class TestParser(unittest.TestCase):
         self.assertEqual(ApplTerm("a", [VarTerm("x"), VarTerm("y")]), term)
 
     def test_rules(self):
-        text = """a(x, y) --> b"""
+        text = """a(x, y) --> b where 1 == 1"""
 
-        term = Parser.rule(text)
+        parsed = Parser.rule(text)
 
-        self.assertEqual(Rule(ApplTerm("a", [VarTerm("x"), VarTerm("y")]), VarTerm("b")), term)
+        expected = Rule(ApplTerm("a", [VarTerm("x"), VarTerm("y")]), VarTerm("b"))
+        expected.premises.append(EqualityCheckPremise(IntTerm(1), IntTerm(1)))
+
+        self.assertEqual(expected, parsed)
 
     def test_parentheses(self):
         text = """
