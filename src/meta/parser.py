@@ -20,6 +20,11 @@ class Parser:
         return Parser(text).__parse_term()
 
     @staticmethod
+    def rule(text):
+        """Helper method for parsing a single rule"""
+        return Parser(text).__parse_rule()
+
+    @staticmethod
     def premise(text):
         """Helper method for parsing a single premise"""
         return Parser(text).__parse_premise()
@@ -35,17 +40,8 @@ class Parser:
                 self.module.imports = [t.value for t in self.__collect(IdToken)]
             elif keyword == "rules":
                 while True:
-                    before = self.__parse_term()
-                    if before is None: break;
-                    self.__expect_value(OperatorToken, "-->")
-                    after = self.__expect_term()
-                    rule = Rule(before, after)
-                    if self.__possible_value(KeywordToken, "where"):
-                        while True:
-                            premise = self.__parse_premise()
-                            rule.premises.append(premise)
-                            if not self.__possible(SemiColonToken): break
-                        self.__expect(PeriodToken)
+                    if self.__possible(KeywordToken) or self.__possible(EofToken): break
+                    rule = self.__parse_rule()
                     self.module.rules.append(rule)
             return self.module
         elif isinstance(token, EofToken):
@@ -119,7 +115,7 @@ class Parser:
     def __expect_term(self):
         term = self.__parse_term()
         if term is None:
-            raise ParseError("Failed to parse a term", None)
+            raise ParseError("Expected to parse a term", self.tokenizer.next())
         return term
 
     def __parse_premise(self):
@@ -133,3 +129,18 @@ class Parser:
             return PatternMatchPremise(left, right)
         else:
             raise NotImplementedError()
+
+    def __parse_rule(self):
+        before = self.__expect_term()
+        self.__expect_value(OperatorToken, "-->")
+        after = self.__expect_term()
+        rule = Rule(before, after)
+
+        if self.__possible_value(KeywordToken, "where"):
+            while True:
+                premise = self.__parse_premise()
+                rule.premises.append(premise)
+                if not self.__possible(SemiColonToken): break
+            self.__expect(PeriodToken)
+
+        return rule

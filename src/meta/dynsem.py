@@ -18,6 +18,25 @@ class Rule:
         self.before = before
         self.after = after
 
+    def __str__(self):
+        transform = "{} --> {}".format(self.before, self.after)
+        if self.premises: transform += " where " + "; ".join(self.premises)
+        return transform
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        return NotImplemented
+
+    def __ne__(self, other):
+        if isinstance(other, self.__class__):
+            return not self.__eq__(other)
+        return NotImplemented
+
+
 
 class Premise:
     def __init__(self, left, right):

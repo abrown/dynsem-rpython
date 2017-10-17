@@ -15,6 +15,17 @@ class TestInterpreter(unittest.TestCase):
 
         self.assertEqual(result, Parser.term("b"))
 
+    def test_multiple_transformations(self):
+        mod = Module()
+        mod.rules.append(Parser.rule("a() --> b()"))
+        mod.rules.append(Parser.rule("b() --> c()"))
+        mod.rules.append(Parser.rule("c() --> d()"))
+        term = Parser.term("a()")
+
+        result = Interpreter.interpret(mod, term)
+
+        self.assertEqual(result, Parser.term("d()"))
+
 
 if __name__ == '__main__':
     unittest.main()
