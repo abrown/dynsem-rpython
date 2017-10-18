@@ -1,4 +1,4 @@
-RPYTHON=../pypy/rpython/bin/rpython
+RPYTHON=3rd/pypy/rpython/bin/rpython
 
 all: test
 
