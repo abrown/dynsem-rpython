@@ -5,7 +5,7 @@ class Location:
         self.file = file
 
     def __repr__(self):
-        return "{}:{}".format(self.file if self.file else "<code string>", self.line)
+        return "%s:%s" % (self.file if self.file else "<code string>", self.line)
 
 
 class Token:
@@ -14,7 +14,7 @@ class Token:
         self.value = value
 
     def __repr__(self):
-        return "{}{} at {}".format(self.__class__.__name__, "=" + self.value if self.value else "", self.location)
+        return "%s%s at %s" % (self.__class__.__name__, "=" + self.value if self.value else "", self.location)
 
 
 class EofToken(Token): pass

@@ -28,12 +28,12 @@ class Interpreter:
             for premise in rule.premises:
                 if isinstance(premise, EqualityCheckPremise):
                     if Interpreter.resolve(premise.left, context) != Interpreter.resolve(premise.right, context):
-                        raise InterpreterError("Expected {} to equal {}".format(premise.left, premise.right))
+                        raise InterpreterError("Expected %s to equal %s" % (premise.left, premise.right))
                 elif isinstance(premise, PatternMatchPremise):
                     if premise.right.matches(premise.left):
                         Interpreter.bind(premise.left, premise.right, context)
                     else:
-                        raise InterpreterError("Expected {} to match {}".format(premise.left, premise.right))
+                        raise InterpreterError("Expected %s to match %s" % (premise.left, premise.right))
                 elif isinstance(premise, AssignmentPremise):
                     context[premise.right.value] = Interpreter.resolve(premise.left, context)
                 else:

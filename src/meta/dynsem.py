@@ -19,7 +19,7 @@ class Rule:
         self.after = after
 
     def __str__(self):
-        transform = "{} --> {}".format(self.before, self.after)
+        transform = "%s --> %s" % (self.before, self.after)
         if self.premises:
             transform += " where "
             transform += "; ".join(map(str, self.premises))
@@ -47,7 +47,7 @@ class Premise:
         self.right = right
 
     def __str__(self):
-        return "{} {} {}".format(self.left, "?", self.right)
+        return "%s %s %s" % (self.left, "?", self.right)
 
     def __repr__(self):
         return self.__str__()
@@ -68,7 +68,7 @@ class PatternMatchPremise(Premise):
         Premise.__init__(self, left, right)
 
     def __str__(self):
-        return "{} {} {}".format(self.left, "=>", self.right)
+        return "%s %s %s" % (self.left, "=>", self.right)
 
 
 class EqualityCheckPremise(Premise):
@@ -76,7 +76,7 @@ class EqualityCheckPremise(Premise):
         Premise.__init__(self, left, right)
 
     def __str__(self):
-        return "{} {} {}".format(self.left, "==", self.right)
+        return "%s %s %s" % (self.left, "==", self.right)
 
 
 class AssignmentPremise(Premise):
@@ -84,4 +84,4 @@ class AssignmentPremise(Premise):
         Premise.__init__(self, left, right)
 
     def __str__(self):
-        return "{} {} {}".format(self.left, "=>", self.right)
+        return "%s %s %s" % (self.left, "=>", self.right)
