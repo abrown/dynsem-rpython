@@ -18,7 +18,10 @@ class Interpreter:
 
     @staticmethod
     def find(term, mod):
-        return next((rule for rule in mod.rules if rule.before.matches(term)), None)
+        for rule in mod.rules:
+            if rule.before.matches(term):
+                return rule
+        return None
 
     @staticmethod
     def transform(term, rule):

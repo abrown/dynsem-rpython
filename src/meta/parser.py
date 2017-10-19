@@ -75,7 +75,7 @@ class Parser:
     def __expect_value(self, type, expected=None):
         token = self.__expect(type)
         if expected and token.value != expected:
-            raise ParseError("Expected a token with value %s but found: " % expected or "", token.value)
+            raise ParseError("Expected a token with value %s but found: " % str(expected), token)
 
     def __possible(self, type):
         token = self.tokenizer.next()

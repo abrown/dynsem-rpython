@@ -36,8 +36,11 @@ class ApplTerm(Term):
         self.args = args if args else []
 
     def matches(self, term):
-        return self.type == term.type and self.name == term.name and len(self.args) == len(term.args) \
-               and all(map(lambda ab: ab[0].matches(ab[1]), zip(self.args, term.args)))
+        if self.type != term.type or self.name != term.name or len(self.args) != len(term.args):
+            return False
+        for (a, b) in zip(self.args, term.args):
+            if not a.matches(b): return False
+        return True
 
     def __str__(self):
         return self.name if not self.args else "%s(%s)" % (self.name, ", ".join(map(str, self.args)))

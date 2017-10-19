@@ -71,7 +71,7 @@ class Tokenizer:
             c = self.__read()
             if c == '':
                 if self.in_line_comment or self.in_multiline_comment:
-                    raise TokenError("Unmatched open comment", self.line)
+                    raise TokenError("Unmatched open comment", self.current_location())
                 else:
                     token = EofToken(self.current_location())
             # new lines
