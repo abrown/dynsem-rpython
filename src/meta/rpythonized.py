@@ -1,6 +1,6 @@
-from .dynsem import Module
-from .interpreter import Interpreter
-from .parser import Parser
+from dynsem import Module
+from interpreter import Interpreter
+from parser import Parser
 
 
 def main(argv):

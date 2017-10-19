@@ -1,5 +1,5 @@
-from .dynsem import *
-from .term import *
+from dynsem import *
+from term import *
 
 
 class InterpreterError(Exception):

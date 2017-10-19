@@ -6,7 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/meta/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Python 3.6.2 (/usr/bin/python3)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

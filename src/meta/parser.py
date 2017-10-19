@@ -1,6 +1,6 @@
-from .dynsem import *
-from .term import *
-from .tokenizer import *
+from dynsem import *
+from term import *
+from tokenizer import *
 
 
 class ParseError(Exception):
@@ -94,7 +94,7 @@ class Parser:
         if isinstance(token, IdToken):
             return self.__parse_identifier(token)
         elif isinstance(token, NumberToken):
-            return IntTerm(int(token.value))
+            return IntTerm(0 if token.value is None else int(token.value))
         else:
             self.tokenizer.undo(token)
             return None
