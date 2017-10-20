@@ -38,7 +38,10 @@ class Interpreter:
                     else:
                         raise InterpreterError("Expected %s to match %s" % (premise.left, premise.right))
                 elif isinstance(premise, AssignmentPremise):
-                    context[premise.right.value] = Interpreter.resolve(premise.left, context)
+                    if isinstance(premise.right, VarTerm):
+                        context[premise.right.name] = Interpreter.resolve(premise.left, context)
+                    else:
+                        raise InterpreterError("Cannot assign to anything other than a variable (e.g. 2 => x); TODO add support for constructor assignment (e.g. a(1, 2) => a(x, y))")
                 else:
                     raise NotImplementedError()
         return rule.after
