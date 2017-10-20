@@ -9,8 +9,9 @@ class InterpreterError(Exception):
 
 class Interpreter:
     @staticmethod
-    def interpret(mod, term):
+    def interpret(mod, term, debug=False):
         while term is not None:
+            if debug: print str(term.as_string())
             rule = Interpreter.find(term, mod)
             if not rule: break
             term = Interpreter.transform(term, rule)

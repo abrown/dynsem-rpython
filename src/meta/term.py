@@ -6,6 +6,9 @@ class Term:
     VAR = 4
     BLOB = 5
 
+    def as_string(self):
+        return self.__str__()
+
     def matches(self, term):
         return True if isinstance(self, VarTerm) else self == term
 
@@ -43,7 +46,10 @@ class ApplTerm(Term):
         return True
 
     def __str__(self):
-        return self.name if not self.args else "%s(%s)" % (self.name, ", ".join(map(str, self.args)))
+        args = []
+        for a in self.args:
+            args.append(str(a))
+        return self.name if not self.args else "%s(%s)" % (self.name, ", ".join(args))
 
 
 class IntTerm(Term):

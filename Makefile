@@ -11,4 +11,5 @@ test:
 	python -m unittest discover -s src/meta/test -p "*.py" -t .
 
 bin/meta: src/meta/rpythonized.py
+	mkdir -p bin
 	python ${RPYTHON} --log --output=$@ $<

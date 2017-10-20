@@ -11,7 +11,7 @@ def main(argv):
 
     term = Parser.term("a()")
 
-    Interpreter.interpret(mod, term)
+    Interpreter.interpret(mod, term, True)
     return 0
 
 
