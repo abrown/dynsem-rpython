@@ -38,8 +38,8 @@ class ApplTerm(Term):
     def matches(self, term):
         if self.type != term.type or self.name != term.name or len(self.args) != len(term.args):
             return False
-        for (a, b) in zip(self.args, term.args):
-            if not a.matches(b): return False
+        for i in range(len(self.args)):
+            if not self.args[i].matches(term.args[i]): return False
         return True
 
     def __str__(self):

@@ -51,8 +51,9 @@ class Interpreter:
         if isinstance(pattern, VarTerm):
             context[pattern.name] = term
         elif isinstance(pattern, ApplTerm):
-            for (term_arg, pattern_arg) in zip(term.args, pattern.args):
-                Interpreter.bind(term_arg, pattern_arg, context)
+            if len(term.args) != len(pattern.args): raise InterpreterError("Expected the term and the pattern to have the same number of arguments")
+            for i in range(len(term.args)):
+                Interpreter.bind(term.args[i], pattern.args[i], context)
 
     @staticmethod
     def resolve(term, context):
