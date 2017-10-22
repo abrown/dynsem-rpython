@@ -1,6 +1,6 @@
 import unittest
 
-from ..parser import *
+from src.meta.parser import *
 
 
 class TestParser(unittest.TestCase):
@@ -62,6 +62,13 @@ class TestParser(unittest.TestCase):
         self.assertEqual(2, len(mod.rules))
         self.assertEqual(ApplTerm("Lit", [VarTerm("s")]), mod.rules[0].before)
         self.assertEqual(ApplTerm("NumV", [ApplTerm("addI", [VarTerm("a"), VarTerm("b")])]), mod.rules[1].after)
+
+    def test_assignment(self):
+        rule = Parser.rule("E |- bindVar(x, v) --> {x |--> v, E}")
+
+        self.assertIsInstance(rule.after, EnvTerm)
+        self.assertEqual(2, len(rule.after.assignments))
+        self.assertEqual(VarTerm("E"), rule.components[0])
 
 
 if __name__ == '__main__':

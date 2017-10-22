@@ -11,12 +11,15 @@ class Module:
 
 
 class Rule:
-    def __init__(self, before, after, premises=None):
+    def __init__(self, before, after, components=None, premises=None):
+        self.before = before
+        self.after = after
+        if components is None:
+            components = []
+        self.components = components
         if premises is None:
             premises = []
         self.premises = premises
-        self.before = before
-        self.after = after
 
     def __str__(self):
         transform = "%s --> %s" % (self.before, self.after)

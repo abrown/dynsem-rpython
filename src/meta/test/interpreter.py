@@ -1,8 +1,7 @@
 import unittest
 
-from ..dynsem import *
-from ..interpreter import *
-from ..parser import Parser
+from src.meta.interpreter import *
+from src.meta.parser import Parser
 
 
 class TestInterpreter(unittest.TestCase):

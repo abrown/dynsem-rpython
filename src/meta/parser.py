@@ -1,12 +1,15 @@
-from dynsem import *
-from term import *
-from tokenizer import *
+from src.meta.dynsem import *
+from src.meta.term import *
+from src.meta.tokenizer import *
 
 
 class ParseError(Exception):
     def __init__(self, reason, token):
         self.reason = reason
         self.token = token
+
+    def __str__(self):
+        return self.reason + " at token " + str(self.token)
 
 
 class Parser:
@@ -86,8 +89,12 @@ class Parser:
             return None
 
     def __possible_value(self, type, expected):
-        token = self.__possible(type)
-        return token if token and expected and token.value == expected else None
+        token = self.tokenizer.next()
+        if isinstance(token, type) and expected and token.value == expected:
+            return token
+        else:
+            self.tokenizer.undo(token)
+            return None
 
     def __parse_term(self):
         token = self.tokenizer.next()
@@ -95,6 +102,8 @@ class Parser:
             return self.__parse_identifier(token)
         elif isinstance(token, NumberToken):
             return IntTerm(0 if token.value is None else int(token.value))
+        elif isinstance(token, LeftBraceToken):
+            return self.__parse_component(token)
         else:
             self.tokenizer.undo(token)
             return None
@@ -111,6 +120,21 @@ class Parser:
             return ApplTerm(id.value, args)
         else:
             return VarTerm(id.value)
+
+    def __parse_component(self, id):
+        assignments = {}
+        while True:
+            name = self.__parse_term()
+            if name is None: break
+            if not isinstance(name, VarTerm): raise ParseError("Expected a variable term but found " + str(name), None)
+            if self.__possible_value(OperatorToken, "|-->"):
+                value = self.__expect_term()
+            else:
+                value = None
+            assignments[name.name] = value
+            self.__possible(CommaToken)
+        self.__expect(RightBraceToken)
+        return EnvTerm(assignments)
 
     def __expect_term(self):
         term = self.__parse_term()
@@ -132,15 +156,24 @@ class Parser:
 
     def __parse_rule(self):
         before = self.__expect_term()
+
+        # parse semantic components
+        components = []
+        if self.__possible_value(OperatorToken, "|-"):
+            components.append(before)
+            before = self.__expect_term()
+
+        # read body
         self.__expect_value(OperatorToken, "-->")
         after = self.__expect_term()
-        rule = Rule(before, after)
 
+        # parse premises
+        premises = []
         if self.__possible_value(KeywordToken, "where"):
             while True:
                 premise = self.__parse_premise()
-                rule.premises.append(premise)
+                premises.append(premise)
                 if not self.__possible(SemiColonToken): break
             self.__possible(PeriodToken)
 
-        return rule
+        return Rule(before, after, components, premises)

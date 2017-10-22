@@ -1,6 +1,6 @@
 import unittest
 
-from ..parser import *
+from src.meta.parser import *
 
 
 class TestParser(unittest.TestCase):

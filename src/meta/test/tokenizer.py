@@ -1,6 +1,6 @@
 import unittest
 
-from ..tokenizer import *
+from src.meta.tokenizer import *
 
 
 class TestTokenizer(unittest.TestCase):

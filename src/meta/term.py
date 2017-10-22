@@ -1,19 +1,12 @@
 class Term:
-    INT = 0
-    REAL = 1
-    APPL = 2
-    LIST = 3
-    VAR = 4
-    BLOB = 5
-
     def as_string(self):
         return self.__str__()
 
     def matches(self, term):
         return True if isinstance(self, VarTerm) else self == term
 
-    def __init__(self, type):
-        self.type = type
+    def __init__(self):
+        pass
 
     def __str__(self):
         return self.__class__.__name__
@@ -34,12 +27,12 @@ class Term:
 
 class ApplTerm(Term):
     def __init__(self, name, args=None):
-        Term.__init__(self, Term.APPL)
+        Term.__init__(self)
         self.name = name
         self.args = args if args else []
 
     def matches(self, term):
-        if self.type != term.type or self.name != term.name or len(self.args) != len(term.args):
+        if not isinstance(term, self.__class__) or self.name != term.name or len(self.args) != len(term.args):
             return False
         for i in range(len(self.args)):
             if not self.args[i].matches(term.args[i]): return False
@@ -54,7 +47,7 @@ class ApplTerm(Term):
 
 class IntTerm(Term):
     def __init__(self, value):
-        Term.__init__(self, Term.INT)
+        Term.__init__(self)
         self.number = value
 
     def __str__(self):
@@ -63,8 +56,17 @@ class IntTerm(Term):
 
 class VarTerm(Term):
     def __init__(self, name):
-        Term.__init__(self, Term.VAR)
+        Term.__init__(self)
         self.name = name
 
     def __str__(self):
         return str(self.name)
+
+
+class EnvTerm(Term):
+    def __init__(self, assignments=None):
+        Term.__init__(self)
+        self.assignments = assignments if assignments else {}
+
+    def __str__(self):
+        return str(self.assignments)

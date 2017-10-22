@@ -1,7 +1,7 @@
 import unittest
 
-from ..parser import *
-from ..transform import *
+from src.meta.parser import *
+from src.meta.transform import *
 
 
 class TestTransform(unittest.TestCase):
