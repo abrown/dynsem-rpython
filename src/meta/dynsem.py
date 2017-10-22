@@ -96,3 +96,13 @@ class ReductionPremise(Premise):
 
     def __str__(self):
         return "%s %s %s" % (self.left, "-->", self.right)
+
+
+class CasePremise(Premise):
+    def __init__(self, left, values=None, premises=None):
+        Premise.__init__(self, left, None)
+        self.values = values if values else []
+        self.premises = premises if premises else []
+
+    def __str__(self):
+        return "case %s of {...}" % self.left

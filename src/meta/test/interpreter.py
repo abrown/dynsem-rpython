@@ -1,7 +1,9 @@
 import unittest
 
-from src.meta.interpreter import *
+from src.meta.dynsem import Module, Rule
+from src.meta.interpreter import Interpreter, InterpreterError
 from src.meta.parser import Parser
+from src.meta.term import IntTerm, EnvWriteTerm, ApplTerm
 
 
 class TestInterpreter(unittest.TestCase):
@@ -74,17 +76,17 @@ class TestInterpreter(unittest.TestCase):
 
         self.assertEqual(result, ApplTerm("c"))
 
-    # def test_assignment_then_reading(self):
-    #     mod = Module()
-    #     mod.rules.append(Parser.rule("E |- write(x, v) --> {x |--> v, E}"))
-    #     mod.rules.append(Parser.rule("E |- read(x) --> E[x]"))
-    #     term = Parser.term("bindVar(x, 1); read(x)") # TODO no way to do sequences currently
-    #     sut = Interpreter()
-    #
-    #     out = sut.interpret(mod, term)
-    #
-    #     self.assertIsInstance(out, EnvTerm)
-    #     self.assertEqual(IntTerm(1), sut.environment["x"])
+        # def test_assignment_then_reading(self):
+        #     mod = Module()
+        #     mod.rules.append(Parser.rule("E |- write(x, v) --> {x |--> v, E}"))
+        #     mod.rules.append(Parser.rule("E |- read(x) --> E[x]"))
+        #     term = Parser.term("bindVar(x, 1); read(x)") # TODO no way to do sequences currently
+        #     sut = Interpreter()
+        #
+        #     out = sut.interpret(mod, term)
+        #
+        #     self.assertIsInstance(out, EnvTerm)
+        #     self.assertEqual(IntTerm(1), sut.environment["x"])
 
 
 if __name__ == '__main__':

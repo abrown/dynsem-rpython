@@ -72,13 +72,13 @@ class Parser:
     def __expect(self, type):
         token = self.tokenizer.next()
         if not isinstance(token, type):
-            raise ParseError("Expected a token of %s but found: " % type, token)
+            raise ParseError("Expected a token of %s but found something else" % type, token)
         return token
 
     def __expect_value(self, type, expected=None):
         token = self.__expect(type)
         if expected and token.value != expected:
-            raise ParseError("Expected a token with value %s but found: " % str(expected), token)
+            raise ParseError("Expected a token with value %s but found something else" % str(expected), token)
 
     def __possible(self, type):
         token = self.tokenizer.next()
@@ -147,6 +147,9 @@ class Parser:
         return term
 
     def __parse_premise(self):
+        if self.__possible_value(KeywordToken, "case"):
+            return self.__parse_case()
+
         left = self.__parse_term()
         operator = self.__expect(OperatorToken)
         right = self.__parse_term()
@@ -162,6 +165,24 @@ class Parser:
             return ReductionPremise(left, right)
         else:
             raise NotImplementedError()
+
+    def __parse_case(self):
+        var = self.__expect_term()
+        self.__expect_value(KeywordToken, "of")
+        self.__expect(LeftBraceToken)
+
+        values = []
+        sub_premises = []
+        while True:
+            if self.__possible_value(KeywordToken, "otherwise"):
+                values.append(None)
+            else:
+                values.append(self.__expect_term())
+            self.__expect_value(OperatorToken, "=>")
+            sub_premises.append(self.__parse_premise())
+            if self.__possible(RightBraceToken): break
+
+        return CasePremise(var, values, sub_premises)
 
     def __parse_rule(self):
         before = self.__expect_term()

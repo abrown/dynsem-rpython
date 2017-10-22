@@ -45,7 +45,8 @@ def is_whitespace(c):
 def is_id_char(c):
     return c in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/'
 def is_keyword(id):
-    return id in ["module", "imports", "signature", "constructors", "arrows", "components", "native", "rules", "where"]
+    return id in ["module", "imports", "signature", "constructors", "arrows", "components", "native", "rules", "where",
+                  "case", "of", "otherwise"]
 def is_operator_char(c):
     return c in '+-*/<>=:|'
 def is_number_char(c):

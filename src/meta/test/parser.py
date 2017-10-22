@@ -1,6 +1,8 @@
 import unittest
 
-from src.meta.parser import *
+from src.meta.dynsem import EqualityCheckPremise, Rule, CasePremise
+from src.meta.parser import Parser
+from src.meta.term import ApplTerm, VarTerm, IntTerm, EnvReadTerm, EnvWriteTerm
 
 
 class TestParser(unittest.TestCase):
@@ -76,6 +78,14 @@ class TestParser(unittest.TestCase):
         self.assertIsInstance(rule.after, EnvReadTerm)
         self.assertEqual("E", rule.after.name)
         self.assertEqual("x", rule.after.key)
+
+    def test_case(self):
+        premise = Parser.premise("case i of {1 => x --> y otherwise => y --> z}")
+
+        self.assertIsInstance(premise, CasePremise)
+        self.assertEqual("i", premise.left.name)
+        self.assertEqual(2, len(premise.values))
+        self.assertEqual(2, len(premise.premises))
 
 
 if __name__ == '__main__':
