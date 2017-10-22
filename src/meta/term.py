@@ -67,6 +67,3 @@ class EnvTerm(Term):
     def __init__(self, assignments=None):
         Term.__init__(self)
         self.assignments = assignments if assignments else {}
-
-    def __str__(self):
-        return str(self.assignments)

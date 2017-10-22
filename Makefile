@@ -12,4 +12,4 @@ test:
 
 bin/meta: src/meta/rpythonized.py
 	mkdir -p bin
-	python ${RPYTHON} --log --output=$@ $<
+	PYTHONPATH=. python ${RPYTHON} --log --output=$@ $<
