@@ -26,6 +26,8 @@ class LeftParensToken(Token): pass
 class RightParensToken(Token): pass
 class LeftBraceToken(Token): pass
 class RightBraceToken(Token): pass
+class LeftBracketToken(Token): pass
+class RightBracketToken(Token): pass
 class PeriodToken(Token): pass
 class CommaToken(Token): pass
 class SemiColonToken(Token): pass
@@ -104,6 +106,10 @@ class Tokenizer:
                 token = LeftBraceToken(self.current_location())
             elif c == '}':
                 token = RightBraceToken(self.current_location())
+            elif c == '[':
+                token = LeftBracketToken(self.current_location())
+            elif c == ']':
+                token = RightBracketToken(self.current_location())
             elif c == ',':
                 token = CommaToken(self.current_location())
             elif c == ';':

@@ -50,13 +50,25 @@ class TestInterpreter(unittest.TestCase):
 
         out = sut.interpret(mod, term)
 
-        self.assertIsInstance(out, EnvTerm)
+        self.assertIsInstance(out, EnvWriteTerm)
         self.assertEqual(IntTerm(1), sut.environment["x"])
-    #
-    # def test_if(self):
+
+    def test_retrieval(self):
+        mod = Module()
+        mod.rules.append(Parser.rule("E |- read(y) --> E[y]"))
+        term = Parser.term("read(y)")
+        sut = Interpreter()
+        sut.environment["y"] = 42
+
+        out = sut.interpret(mod, term)
+
+        self.assertEqual(out, 42)
+
+    # def test_assignment_then_reading(self):
     #     mod = Module()
-    #     mod.rules.append(Parser.rule("E |- bindVar(x, v) --> {x |--> v, E}"))
-    #     term = Parser.term("bindVar(x, 1)")
+    #     mod.rules.append(Parser.rule("E |- write(x, v) --> {x |--> v, E}"))
+    #     mod.rules.append(Parser.rule("E |- read(x) --> E[x]"))
+    #     term = Parser.term("bindVar(x, 1); read(x)") # TODO no way to do sequences currently
     #     sut = Interpreter()
     #
     #     out = sut.interpret(mod, term)

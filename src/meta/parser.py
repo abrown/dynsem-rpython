@@ -103,7 +103,7 @@ class Parser:
         elif isinstance(token, NumberToken):
             return IntTerm(0 if token.value is None else int(token.value))
         elif isinstance(token, LeftBraceToken):
-            return self.__parse_component(token)
+            return self.__parse_new_environment(token)
         else:
             self.tokenizer.undo(token)
             return None
@@ -118,10 +118,14 @@ class Parser:
                 self.__possible(CommaToken)
             self.__expect(RightParensToken)
             return ApplTerm(id.value, args)
+        if self.__possible(LeftBracketToken):
+            name = self.__expect(IdToken)
+            self.__expect(RightBracketToken)
+            return EnvReadTerm(id.value, name.value)
         else:
             return VarTerm(id.value)
 
-    def __parse_component(self, id):
+    def __parse_new_environment(self, id):
         assignments = {}
         while True:
             name = self.__parse_term()
@@ -130,11 +134,11 @@ class Parser:
             if self.__possible_value(OperatorToken, "|-->"):
                 value = self.__expect_term()
             else:
-                value = EnvTerm()  # TODO this is by "convention" but not necessarily clear
+                value = EnvWriteTerm()  # TODO this is by "convention" but not necessarily clear
             assignments[name.name] = value
             self.__possible(CommaToken)
         self.__expect(RightBraceToken)
-        return EnvTerm(assignments)
+        return EnvWriteTerm(assignments)
 
     def __expect_term(self):
         term = self.__parse_term()

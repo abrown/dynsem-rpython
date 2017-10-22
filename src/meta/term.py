@@ -63,7 +63,15 @@ class VarTerm(Term):
         return str(self.name)
 
 
-class EnvTerm(Term):
+class EnvWriteTerm(Term):
     def __init__(self, assignments=None):
         Term.__init__(self)
         self.assignments = assignments if assignments else {}
+
+
+class EnvReadTerm(Term):
+    def __init__(self, name, key):
+        Term.__init__(self)
+        self.name = name  # the environment name
+        self.key = key  # the name to retrieve from it
+

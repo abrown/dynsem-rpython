@@ -29,6 +29,7 @@ class Interpreter:
     def transform(self, term, rule):
         context = {}
         Interpreter.bind(term, rule.before, context)
+        # TODO bind the semantic components as well
 
         # handle premises
         if rule.premises:
@@ -51,16 +52,18 @@ class Interpreter:
                     raise NotImplementedError()
 
         # handle environment changes
-        if isinstance(rule.after, EnvTerm):
+        if isinstance(rule.after, EnvWriteTerm):
             new_environment = {}
             for key in rule.after.assignments:
                 value = rule.after.assignments[key]
-                if isinstance(value, EnvTerm):
+                if isinstance(value, EnvWriteTerm):
                     new_environment.update(
                         self.environment)  # TODO this is an unchecked assumption that {..., E, ...} refers to an E in the semantic components
                 else:
                     new_environment[key] = Interpreter.resolve(value, context)
             self.environment = new_environment
+        elif isinstance(rule.after, EnvReadTerm):
+            return self.environment[rule.after.key]  # TODO this relies on the same unchecked assumption above
 
         return Interpreter.resolve(rule.after, context)
 

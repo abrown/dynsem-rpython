@@ -63,12 +63,19 @@ class TestParser(unittest.TestCase):
         self.assertEqual(ApplTerm("Lit", [VarTerm("s")]), mod.rules[0].before)
         self.assertEqual(ApplTerm("NumV", [ApplTerm("addI", [VarTerm("a"), VarTerm("b")])]), mod.rules[1].after)
 
-    def test_assignment(self):
+    def test_environment_write(self):
         rule = Parser.rule("E |- bindVar(x, v) --> {x |--> v, E}")
 
-        self.assertIsInstance(rule.after, EnvTerm)
+        self.assertIsInstance(rule.after, EnvWriteTerm)
         self.assertEqual(2, len(rule.after.assignments))
         self.assertEqual(VarTerm("E"), rule.components[0])
+
+    def test_environment_read(self):
+        rule = Parser.rule("E |- read(x) --> E[x]")
+
+        self.assertIsInstance(rule.after, EnvReadTerm)
+        self.assertEqual("E", rule.after.name)
+        self.assertEqual("x", rule.after.key)
 
 
 if __name__ == '__main__':
