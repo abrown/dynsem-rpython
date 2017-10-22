@@ -13,3 +13,4 @@ test:
 bin/meta: src/meta/rpythonized.py
 	mkdir -p bin
 	PYTHONPATH=. python ${RPYTHON} --log --output=$@ $<
+.PHONY: bin/meta
