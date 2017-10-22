@@ -9,27 +9,28 @@ class InterpreterError(Exception):
 
 
 class Interpreter:
-    @staticmethod
-    def interpret(mod, term, debug=False):
+    def __init__(self):
+        self.environment = {}
+
+    def interpret(self, mod, term, debug=False):
         while term is not None:
             if debug: print(str(term.as_string()))
-            rule = Interpreter.find(term, mod)
+            rule = self.find(term, mod)
             if not rule: break
-            term = Interpreter.transform(term, rule)
+            term = self.transform(term, rule)
         return term
 
-    @staticmethod
-    def find(term, mod):
+    def find(self, term, mod):
         for rule in mod.rules:
             if rule.before.matches(term):
                 return rule
         return None
 
-    @staticmethod
-    def transform(term, rule):
+    def transform(self, term, rule):
         context = {}
         Interpreter.bind(term, rule.before, context)
 
+        # handle premises
         if rule.premises:
             for premise in rule.premises:
                 if isinstance(premise, EqualityCheckPremise):
@@ -44,9 +45,22 @@ class Interpreter:
                     if isinstance(premise.left, VarTerm):
                         context[premise.left.name] = Interpreter.resolve(premise.right, context)
                     else:
-                        raise InterpreterError("Cannot assign to anything other than a variable (e.g. x => 2); TODO add support for constructor assignment (e.g. a(1, 2) => a(x, y))")
+                        raise InterpreterError(
+                            "Cannot assign to anything other than a variable (e.g. x => 2); TODO add support for constructor assignment (e.g. a(1, 2) => a(x, y))")
                 else:
                     raise NotImplementedError()
+
+        # handle environment changes
+        if isinstance(rule.after, EnvTerm):
+            new_environment = {}
+            for key in rule.after.assignments:
+                value = rule.after.assignments[key]
+                if isinstance(value, EnvTerm):
+                    new_environment.update(
+                        self.environment)  # TODO this is an unchecked assumption that {..., E, ...} refers to an E in the semantic components
+                else:
+                    new_environment[key] = Interpreter.resolve(value, context)
+            self.environment = new_environment
 
         return Interpreter.resolve(rule.after, context)
 
@@ -55,7 +69,8 @@ class Interpreter:
         if isinstance(pattern, VarTerm):
             context[pattern.name] = term
         elif isinstance(pattern, ApplTerm):
-            if len(term.args) != len(pattern.args): raise InterpreterError("Expected the term and the pattern to have the same number of arguments")
+            if len(term.args) != len(pattern.args): raise InterpreterError(
+                "Expected the term and the pattern to have the same number of arguments")
             for i in range(len(term.args)):
                 Interpreter.bind(term.args[i], pattern.args[i], context)
 

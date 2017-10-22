@@ -130,7 +130,7 @@ class Parser:
             if self.__possible_value(OperatorToken, "|-->"):
                 value = self.__expect_term()
             else:
-                value = None
+                value = EnvTerm()  # TODO this is by "convention" but not necessarily clear
             assignments[name.name] = value
             self.__possible(CommaToken)
         self.__expect(RightBraceToken)
