@@ -1,3 +1,4 @@
+import unittest
 from dynsem import *
 from term import *
 
@@ -28,6 +29,7 @@ class Interpreter:
     def transform(term, rule):
         context = {}
         Interpreter.bind(term, rule.before, context)
+
         if rule.premises:
             for premise in rule.premises:
                 if isinstance(premise, EqualityCheckPremise):
@@ -39,13 +41,14 @@ class Interpreter:
                     else:
                         raise InterpreterError("Expected %s to match %s" % (premise.left, premise.right))
                 elif isinstance(premise, AssignmentPremise):
-                    if isinstance(premise.right, VarTerm):
-                        context[premise.right.name] = Interpreter.resolve(premise.left, context)
+                    if isinstance(premise.left, VarTerm):
+                        context[premise.left.name] = Interpreter.resolve(premise.right, context)
                     else:
-                        raise InterpreterError("Cannot assign to anything other than a variable (e.g. 2 => x); TODO add support for constructor assignment (e.g. a(1, 2) => a(x, y))")
+                        raise InterpreterError("Cannot assign to anything other than a variable (e.g. x => 2); TODO add support for constructor assignment (e.g. a(1, 2) => a(x, y))")
                 else:
                     raise NotImplementedError()
-        return rule.after
+
+        return Interpreter.resolve(rule.after, context)
 
     @staticmethod
     def bind(term, pattern, context):
@@ -58,7 +61,12 @@ class Interpreter:
 
     @staticmethod
     def resolve(term, context):
-        if isinstance(term, VarTerm):
+        if isinstance(term, VarTerm) and term.name in context:
             return context[term.name]
+        elif isinstance(term, ApplTerm):
+            resolved_args = []
+            for i in range(len(term.args)):
+                resolved_args.append(Interpreter.resolve(term.args[i], context))
+            return ApplTerm(term.name, resolved_args)
         else:
             return term

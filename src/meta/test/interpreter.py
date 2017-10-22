@@ -31,7 +31,38 @@ class TestInterpreter(unittest.TestCase):
         term = Parser.term("a()")
 
         with self.assertRaises(InterpreterError):
-            Interpreter.interpret(mod, term) # does not know where to go when 1 != 2
+            Interpreter.interpret(mod, term)  # does not know where to go when 1 != 2
+
+    def test_transformation_of_result(self):
+        mod = Module()
+        mod.rules.append(Parser.rule("a() --> b where b => 2"))
+        term = Parser.term("a()")
+
+        result = Interpreter.interpret(mod, term)  # does not know where to go when 1 != 2
+
+        self.assertEqual(result, IntTerm(2))
+
+    # def test_assignment(self):
+    #     mod = Module()
+    #     mod.rules.append(Parser.rule("E |- bindVar(x, v) --> {x |--> v, E}"))
+    #     term = Parser.term("bindVar(x, 1)")
+    #     sut = Interpreter()
+    #
+    #     out = sut.interpret(mod, term)
+    #
+    #     self.assertIsInstance(out, EnvTerm)
+    #     self.assertEqual(IntTerm(1), sut.environment["x"])
+    #
+    # def test_if(self):
+    #     mod = Module()
+    #     mod.rules.append(Parser.rule("E |- bindVar(x, v) --> {x |--> v, E}"))
+    #     term = Parser.term("bindVar(x, 1)")
+    #     sut = Interpreter()
+    #
+    #     out = sut.interpret(mod, term)
+    #
+    #     self.assertIsInstance(out, EnvTerm)
+    #     self.assertEqual(IntTerm(1), sut.environment["x"])
 
 
 if __name__ == '__main__':

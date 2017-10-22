@@ -150,7 +150,10 @@ class Parser:
         if "==" == operator.value:
             return EqualityCheckPremise(left, right)
         elif "=>" == operator.value:
-            return PatternMatchPremise(left, right)
+            if isinstance(right, ApplTerm):
+                return PatternMatchPremise(left, right)
+            else:
+                return AssignmentPremise(left, right)
         else:
             raise NotImplementedError()
 
