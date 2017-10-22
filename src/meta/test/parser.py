@@ -2,7 +2,7 @@ import unittest
 
 from src.meta.dynsem import EqualityCheckPremise, Rule, CasePremise
 from src.meta.parser import Parser
-from src.meta.term import ApplTerm, VarTerm, IntTerm, EnvReadTerm, EnvWriteTerm
+from src.meta.term import ApplTerm, VarTerm, IntTerm, EnvReadTerm, EnvWriteTerm, ListTerm
 
 
 class TestParser(unittest.TestCase):
@@ -87,6 +87,11 @@ class TestParser(unittest.TestCase):
         self.assertEqual(2, len(premise.values))
         self.assertEqual(2, len(premise.premises))
 
+    def test_list(self):
+        list = Parser.term("[a, b, 1, 2]")
+
+        self.assertIsInstance(list, ListTerm)
+        self.assertEqual(4, len(list.items))
 
 if __name__ == '__main__':
     unittest.main()

@@ -45,6 +45,46 @@ class ApplTerm(Term):
         return self.name if not self.args else "%s(%s)" % (self.name, ", ".join(args))
 
 
+class ListTerm(Term):
+    def __init__(self, items=None):
+        Term.__init__(self)
+        self.items = items if items else []
+
+    def matches(self, term):
+        if not isinstance(term, self.__class__) or len(self.items) != len(term.items):
+            return False
+        for i in range(len(self.items)):
+            if not self.items[i].matches(term.items[i]): return False
+        return True
+
+    def __str__(self):
+        args = []
+        for a in self.items:
+            args.append(str(a))
+        return "[%s]" % (", ".join(args))
+
+
+class ListPatternTerm(Term):
+    """TODO move this to a patterns package?"""
+
+    def __init__(self, vars=None, rest=None):
+        Term.__init__(self)
+        self.vars = vars if vars else []
+        self.rest = rest
+
+    def matches(self, term):
+        if not isinstance(term, ListTerm) or len(self.vars) > len(term.items):
+            return False
+        else:
+            return True
+
+    def __str__(self):
+        args = []
+        for a in self.vars:
+            args.append(str(a))
+        return "[%s | %s]" % (", ".join(args), self.rest)
+
+
 class IntTerm(Term):
     def __init__(self, value):
         Term.__init__(self)
@@ -74,4 +114,3 @@ class EnvReadTerm(Term):
         Term.__init__(self)
         self.name = name  # the environment name
         self.key = key  # the name to retrieve from it
-

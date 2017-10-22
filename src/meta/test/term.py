@@ -3,7 +3,7 @@ import unittest
 from src.meta.parser import Parser
 
 
-class TestParser(unittest.TestCase):
+class TestTerm(unittest.TestCase):
     def test_term_equality(self):
         a1 = Parser.term("a(x, y)")
         a2 = Parser.term("a(x, y)")
@@ -23,6 +23,12 @@ class TestParser(unittest.TestCase):
         ax = Parser.term("a(x)")
 
         self.assertTrue(ax.matches(a1))
+
+    def test_list_constructor(self):
+        list = Parser.term("[a, b, 1, 2]")
+        pattern = Parser.term("[x | xs]")
+
+        self.assertTrue(pattern.matches(list))
 
 if __name__ == '__main__':
     unittest.main()

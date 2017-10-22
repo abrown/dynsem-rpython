@@ -76,6 +76,14 @@ class TestInterpreter(unittest.TestCase):
 
         self.assertEqual(result, ApplTerm("c"))
 
+    def test_block(self):
+        mod = Module()
+        mod.rules.append(Parser.rule("block([x | xs]) --> block(xs)"))
+        term = Parser.term("block([1, 2, 3, 4])")
+
+        result = Interpreter().interpret(mod, term)
+
+        self.assertEqual(result, ApplTerm("block"))
         # def test_assignment_then_reading(self):
         #     mod = Module()
         #     mod.rules.append(Parser.rule("E |- write(x, v) --> {x |--> v, E}"))

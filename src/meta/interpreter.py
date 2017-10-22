@@ -1,5 +1,5 @@
 from src.meta.dynsem import EqualityCheckPremise, PatternMatchPremise, AssignmentPremise, ReductionPremise, CasePremise
-from src.meta.term import ApplTerm, EnvReadTerm, EnvWriteTerm, VarTerm
+from src.meta.term import ApplTerm, EnvReadTerm, EnvWriteTerm, VarTerm, ListPatternTerm, ListTerm
 
 
 class InterpreterError(Exception):
@@ -89,24 +89,40 @@ class Interpreter:
 
     @staticmethod
     def bind(term, pattern, context):
-        """Bind the names free variables in a pattern to values in a term and save them in a context; TODO make this non-static?"""
+        """Bind the names free variables in a pattern to values in a term and save them in a context; TODO make this
+        non-static?"""
         if isinstance(pattern, VarTerm):
             context[pattern.name] = term
+        elif isinstance(pattern, ListPatternTerm):
+            for i in range(len(pattern.vars)):
+                context[pattern.vars[i].name] = term.items[i]
+            rest = term.items[len(pattern.vars):]
+            context[pattern.rest.name] = ListTerm(rest)
         elif isinstance(pattern, ApplTerm):
-            if len(term.args) != len(pattern.args): raise InterpreterError(
-                "Expected the term and the pattern to have the same number of arguments")
+            if len(term.args) != len(pattern.args): raise InterpreterError("Expected the term and the pattern to have " +
+                                                                           "the same number of arguments")
             for i in range(len(term.args)):
                 Interpreter.bind(term.args[i], pattern.args[i], context)
 
     @staticmethod
     def resolve(term, context):
-        """Using a context, resolve the names of free variables in a pattern to create a new term; TODO make this non-static?"""
+        """Using a context, resolve the names of free variables in a pattern to create a new term; TODO make this
+        non-static?"""
         if isinstance(term, VarTerm) and term.name in context:
             return context[term.name]
         elif isinstance(term, ApplTerm):
             resolved_args = []
             for i in range(len(term.args)):
-                resolved_args.append(Interpreter.resolve(term.args[i], context))
+                resolved_arg = Interpreter.resolve(term.args[i], context)
+                if isinstance(resolved_arg, ListTerm) and not resolved_arg.items:
+                    continue  # special case for empty lists
+                else:
+                    resolved_args.append(resolved_arg)
             return ApplTerm(term.name, resolved_args)
+        elif isinstance(term, ListTerm):
+            resolved_items = []
+            for i in range(len(term.items)):
+                resolved_items.append(Interpreter.resolve(term.items[i], context))
+            return ListTerm(resolved_items)
         else:
             return term

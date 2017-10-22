@@ -104,6 +104,8 @@ class Parser:
             return IntTerm(0 if token.value is None else int(token.value))
         elif isinstance(token, LeftBraceToken):
             return self.__parse_new_environment(token)
+        elif isinstance(token, LeftBracketToken):
+            return self.__parse_list(token)
         else:
             self.tokenizer.undo(token)
             return None
@@ -125,7 +127,7 @@ class Parser:
         else:
             return VarTerm(id.value)
 
-    def __parse_new_environment(self, id):
+    def __parse_new_environment(self, token):
         assignments = {}
         while True:
             name = self.__parse_term()
@@ -139,6 +141,29 @@ class Parser:
             self.__possible(CommaToken)
         self.__expect(RightBraceToken)
         return EnvWriteTerm(assignments)
+
+    def __parse_list(self, token):
+        items = []
+
+        # normal list
+        while True:
+            term = self.__parse_term()
+            if term is None: break
+            items.append(term)
+            if not self.__possible(CommaToken): break
+
+        # patternized list
+        if self.__possible_value(OperatorToken, "|"):
+            for i in items:
+                if not isinstance(i, VarTerm): raise ParseError("Expected list pattern to only include VarTerms", token)
+            rest = self.__expect_term()
+            if not isinstance(rest, VarTerm):
+                raise ParseError("Expected list pattern to only include VarTerms", token)
+            self.__expect(RightBracketToken)
+            return ListPatternTerm(items, rest)
+        else:
+            self.__expect(RightBracketToken)
+            return ListTerm(items)
 
     def __expect_term(self):
         term = self.__parse_term()
