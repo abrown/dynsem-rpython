@@ -11,17 +11,19 @@ class InterpreterError(Exception):
 class Interpreter:
     def __init__(self):
         self.environment = {}
+        self.module = None
 
     def interpret(self, mod, term, debug=False):
+        self.module = mod
         while term is not None:
             if debug: print(str(term.as_string()))
-            rule = self.find(term, mod)
+            rule = self.find(term)
             if not rule: break
             term = self.transform(term, rule)
         return term
 
-    def find(self, term, mod):
-        for rule in mod.rules:
+    def find(self, term):
+        for rule in self.module.rules:
             if rule.before.matches(term):
                 return rule
         return None
@@ -46,8 +48,13 @@ class Interpreter:
                     if isinstance(premise.left, VarTerm):
                         context[premise.left.name] = Interpreter.resolve(premise.right, context)
                     else:
-                        raise InterpreterError(
-                            "Cannot assign to anything other than a variable (e.g. x => 2); TODO add support for constructor assignment (e.g. a(1, 2) => a(x, y))")
+                        raise InterpreterError("Cannot assign to anything other than a variable (e.g. x => 2); TODO add support for constructor assignment (e.g. a(1, 2) => a(x, y))")
+                elif isinstance(premise, ReductionPremise):
+                    intermediate_term = Interpreter.resolve(premise.left, context)
+                    intermediate_rule = self.find(intermediate_term)
+                    if not intermediate_rule: raise InterpreterError("In a reduction premise, failed to find a rule matching: %s" % str(intermediate_term))
+                    intermediate_term = self.transform(intermediate_term, intermediate_rule)
+                    Interpreter.bind(intermediate_term, premise.right, context)
                 else:
                     raise NotImplementedError()
 

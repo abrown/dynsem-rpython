@@ -88,3 +88,11 @@ class AssignmentPremise(Premise):
 
     def __str__(self):
         return "%s %s %s" % (self.left, "=>", self.right)
+
+
+class ReductionPremise(Premise):
+    def __init__(self, left, right):
+        Premise.__init__(self, left, right)
+
+    def __str__(self):
+        return "%s %s %s" % (self.left, "-->", self.right)

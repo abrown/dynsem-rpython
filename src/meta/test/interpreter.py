@@ -42,27 +42,37 @@ class TestInterpreter(unittest.TestCase):
 
         self.assertEqual(result, IntTerm(2))
 
-    def test_assignment(self):
+    def test_environment_assignment(self):
         mod = Module()
         mod.rules.append(Parser.rule("E |- bindVar(x, v) --> {x |--> v, E}"))
         term = Parser.term("bindVar(x, 1)")
         sut = Interpreter()
 
-        out = sut.interpret(mod, term)
+        result = sut.interpret(mod, term)
 
-        self.assertIsInstance(out, EnvWriteTerm)
+        self.assertIsInstance(result, EnvWriteTerm)
         self.assertEqual(IntTerm(1), sut.environment["x"])
 
-    def test_retrieval(self):
+    def test_environment_retrieval(self):
         mod = Module()
         mod.rules.append(Parser.rule("E |- read(y) --> E[y]"))
         term = Parser.term("read(y)")
         sut = Interpreter()
         sut.environment["y"] = 42
 
-        out = sut.interpret(mod, term)
+        result = sut.interpret(mod, term)
 
-        self.assertEqual(out, 42)
+        self.assertEqual(result, 42)
+
+    def test_reduction_premise(self):
+        mod = Module()
+        mod.rules.append(Parser.rule("b() --> c()"))
+        mod.rules.append(Parser.rule("a(x) --> y where x --> y"))
+        term = Parser.term("a(b())")
+
+        result = Interpreter().interpret(mod, term)
+
+        self.assertEqual(result, ApplTerm("c"))
 
     # def test_assignment_then_reading(self):
     #     mod = Module()
