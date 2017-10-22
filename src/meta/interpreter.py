@@ -1,5 +1,5 @@
 from src.meta.dynsem import EqualityCheckPremise, PatternMatchPremise, AssignmentPremise, ReductionPremise, CasePremise
-from src.meta.term import ApplTerm, EnvReadTerm, EnvWriteTerm, VarTerm, ListPatternTerm, ListTerm
+from src.meta.term import ApplTerm, EnvReadTerm, EnvWriteTerm, VarTerm, ListPatternTerm, ListTerm, IntTerm
 
 
 class InterpreterError(Exception):
@@ -16,15 +16,21 @@ class Interpreter:
         self.module = mod
         while term is not None:
             if debug: print(str(term.as_string()))
-            rule = self.find(term)
+            rule = self.find_rule(term)
             if not rule: break
             term = self.transform(term, rule)
         return term
 
-    def find(self, term):
+    def find_rule(self, term):
         for rule in self.module.rules:
-            if rule.before.matches(term):
+            if rule.matches(term):
                 return rule
+        return None
+
+    def find_native_function(self, term):
+        for native in self.module.native_functions:
+            if native.matches(term):
+                return native
         return None
 
     def transform(self, term, rule):
@@ -46,16 +52,16 @@ class Interpreter:
                     new_environment.update(
                         self.environment)  # TODO this is an unchecked assumption that {..., E, ...} refers to an E in the semantic components
                 else:
-                    new_environment[key] = Interpreter.resolve(value, context)
+                    new_environment[key] = self.resolve(value, context)
             self.environment = new_environment
         elif isinstance(rule.after, EnvReadTerm):
             return self.environment[rule.after.key]  # TODO this relies on the same unchecked assumption above
 
-        return Interpreter.resolve(rule.after, context)
+        return self.resolve(rule.after, context)
 
     def evaluate_premise(self, premise, context):
         if isinstance(premise, EqualityCheckPremise):
-            if Interpreter.resolve(premise.left, context) != Interpreter.resolve(premise.right, context):
+            if self.resolve(premise.left, context) != self.resolve(premise.right, context):
                 raise InterpreterError("Expected %s to equal %s" % (premise.left, premise.right))
         elif isinstance(premise, PatternMatchPremise):
             if premise.right.matches(premise.left):
@@ -64,19 +70,20 @@ class Interpreter:
                 raise InterpreterError("Expected %s to match %s" % (premise.left, premise.right))
         elif isinstance(premise, AssignmentPremise):
             if isinstance(premise.left, VarTerm):
-                context[premise.left.name] = Interpreter.resolve(premise.right, context)
+                context[premise.left.name] = self.resolve(premise.right, context)
             else:
                 raise InterpreterError("Cannot assign to anything other than a variable (e.g. x => 2); TODO add " +
                                        "support for constructor assignment (e.g. a(1, 2) => a(x, y))")
         elif isinstance(premise, ReductionPremise):
-            intermediate_term = Interpreter.resolve(premise.left, context)
-            intermediate_rule = self.find(intermediate_term)
-            if not intermediate_rule: raise InterpreterError("In a reduction premise, failed to find a rule " +
-                                                             "matching: %s" % str(intermediate_term))
+            intermediate_term = self.resolve(premise.left, context)
+            intermediate_rule = self.find_rule(intermediate_term)
+            if not intermediate_rule:
+                raise InterpreterError("In a reduction premise, failed to find a rule matching: %s" %
+                                       str(intermediate_term))
             intermediate_term = self.transform(intermediate_term, intermediate_rule)
             Interpreter.bind(intermediate_term, premise.right, context)
         elif isinstance(premise, CasePremise):
-            value = Interpreter.resolve(premise.left, context)
+            value = self.resolve(premise.left, context)
             for i in range(len(premise.values)):
                 if premise.values[i] is None:  # otherwise branch
                     self.evaluate_premise(premise.premises[i], context)
@@ -99,30 +106,46 @@ class Interpreter:
             rest = term.items[len(pattern.vars):]
             context[pattern.rest.name] = ListTerm(rest)
         elif isinstance(pattern, ApplTerm):
-            if len(term.args) != len(pattern.args): raise InterpreterError("Expected the term and the pattern to have " +
-                                                                           "the same number of arguments")
+            if len(term.args) != len(pattern.args):
+                raise InterpreterError("Expected the term and the pattern to have the same number of arguments")
             for i in range(len(term.args)):
                 Interpreter.bind(term.args[i], pattern.args[i], context)
 
-    @staticmethod
-    def resolve(term, context):
+    def resolve(self, term, context):
         """Using a context, resolve the names of free variables in a pattern to create a new term; TODO make this
         non-static?"""
         if isinstance(term, VarTerm) and term.name in context:
             return context[term.name]
         elif isinstance(term, ApplTerm):
-            resolved_args = []
-            for i in range(len(term.args)):
-                resolved_arg = Interpreter.resolve(term.args[i], context)
-                if isinstance(resolved_arg, ListTerm) and not resolved_arg.items:
-                    continue  # special case for empty lists
-                else:
-                    resolved_args.append(resolved_arg)
-            return ApplTerm(term.name, resolved_args)
+            native = self.find_native_function(term)
+            if native:
+                return self.resolve_native(native, term, context)
+            else:
+                return self.resolve_appl(term, context)
         elif isinstance(term, ListTerm):
-            resolved_items = []
-            for i in range(len(term.items)):
-                resolved_items.append(Interpreter.resolve(term.items[i], context))
-            return ListTerm(resolved_items)
+            return self.resolve_list(term, context)
         else:
             return term
+
+    def resolve_native(self, native, term, context):
+        args = []
+        for arg in term.args:
+            resolved = self.resolve(arg, context).number  # TODO need to determine what type of term to use, not hard-code this
+            args.append(resolved)
+        return IntTerm(native.action(*args))  # TODO need to determine what type of term to use, not hard-code this
+
+    def resolve_appl(self, term, context):
+        resolved_args = []
+        for arg in term.args:
+            resolved_arg = self.resolve(arg, context)
+            if isinstance(resolved_arg, ListTerm) and not resolved_arg.items:
+                continue  # special case for empty lists; TODO should we dispose of empty lists like this?
+            else:
+                resolved_args.append(resolved_arg)
+        return ApplTerm(term.name, resolved_args)
+
+    def resolve_list(self, term, context):
+        resolved_items = []
+        for i in range(len(term.items)):
+            resolved_items.append(self.resolve(term.items[i], context))
+        return ListTerm(resolved_items)

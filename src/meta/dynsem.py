@@ -6,27 +6,16 @@ class Module:
         self.constructors = []
         self.arrows = []
         self.components = []
-        self.nativeOperators = []
+        self.native_functions = []
         self.rules = []
 
 
-class Rule:
-    def __init__(self, before, after, components=None, premises=None):
+class Transformation:
+    def __init__(self, before):
         self.before = before
-        self.after = after
-        if components is None:
-            components = []
-        self.components = components
-        if premises is None:
-            premises = []
-        self.premises = premises
 
-    def __str__(self):
-        transform = "%s --> %s" % (self.before, self.after)
-        if self.premises:
-            transform += " where "
-            transform += "; ".join(map(str, self.premises))
-        return transform
+    def matches(self, term):
+        return self.before.matches(term)
 
     def __repr__(self):
         return self.__str__()
@@ -35,13 +24,35 @@ class Rule:
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
         return NotImplemented
-        # if not isinstance(other, self.__class__): return False
-        # return self.before == other.before and self.after == other.after and self.premises == other.premises
 
     def __ne__(self, other):
         if isinstance(other, self.__class__):
             return not self.__eq__(other)
         return NotImplemented
+
+
+class Rule(Transformation):
+    def __init__(self, before, after, components=None, premises=None):
+        Transformation.__init__(self, before)
+        self.after = after
+        self.components = components if components else []
+        self.premises = premises if premises else []
+
+    def __str__(self):
+        transform = "%s --> %s" % (self.before, self.after)
+        if self.premises:
+            transform += " where "
+            transform += "; ".join(map(str, self.premises))
+        return transform
+
+
+class NativeFunction(Transformation):
+    def __init__(self, before, action):
+        Transformation.__init__(self, before)
+        self.action = action
+
+    def __str__(self):
+        return "%s --> [native function]" % self.before
 
 
 class Premise:

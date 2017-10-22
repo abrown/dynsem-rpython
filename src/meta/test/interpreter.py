@@ -1,6 +1,6 @@
 import unittest
 
-from src.meta.dynsem import Module, Rule
+from src.meta.dynsem import Module, Rule, NativeFunction
 from src.meta.interpreter import Interpreter, InterpreterError
 from src.meta.parser import Parser
 from src.meta.term import IntTerm, EnvWriteTerm, ApplTerm
@@ -84,18 +84,16 @@ class TestInterpreter(unittest.TestCase):
         result = Interpreter().interpret(mod, term)
 
         self.assertEqual(result, ApplTerm("block"))
-        # def test_assignment_then_reading(self):
-        #     mod = Module()
-        #     mod.rules.append(Parser.rule("E |- write(x, v) --> {x |--> v, E}"))
-        #     mod.rules.append(Parser.rule("E |- read(x) --> E[x]"))
-        #     term = Parser.term("bindVar(x, 1); read(x)") # TODO no way to do sequences currently
-        #     sut = Interpreter()
-        #
-        #     out = sut.interpret(mod, term)
-        #
-        #     self.assertIsInstance(out, EnvTerm)
-        #     self.assertEqual(IntTerm(1), sut.environment["x"])
 
+    def test_native(self):
+        mod = Module()
+        mod.rules.append(Parser.rule("a(x) --> add(x, 1)"))
+        mod.native_functions.append(NativeFunction(Parser.term("add(x, y)"), lambda x, y: x + y))
+        term = Parser.term("a(1)")
+
+        result = Interpreter().interpret(mod, term)
+
+        self.assertEqual(result, IntTerm(2))
 
 if __name__ == '__main__':
     unittest.main()
