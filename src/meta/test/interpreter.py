@@ -40,7 +40,7 @@ class TestInterpreter(unittest.TestCase):
         mod.rules.append(Parser.rule("a() --> b where b => 2"))
         term = Parser.term("a()")
 
-        result = Interpreter().interpret(mod, term)  # does not know where to go when 1 != 2
+        result = Interpreter().interpret(mod, term)
 
         self.assertEqual(result, IntTerm(2))
 
@@ -94,6 +94,7 @@ class TestInterpreter(unittest.TestCase):
         result = Interpreter().interpret(mod, term)
 
         self.assertEqual(result, IntTerm(2))
+
 
 if __name__ == '__main__':
     unittest.main()

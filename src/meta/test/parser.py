@@ -93,5 +93,12 @@ class TestParser(unittest.TestCase):
         self.assertIsInstance(list, ListTerm)
         self.assertEqual(4, len(list.items))
 
+    def test_if(self):
+        term = Parser.term("if(leq(1, 2), a(), b())")
+
+        self.assertIsInstance(term, ApplTerm)
+        self.assertEqual(3, len(term.args))
+        self.assertEqual("leq", term.args[0].name)
+
 if __name__ == '__main__':
     unittest.main()

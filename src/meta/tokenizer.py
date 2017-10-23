@@ -41,7 +41,7 @@ class TokenError(Exception):
 
 
 def is_whitespace(c):
-    return c in ' \t\n\l'
+    return c in ' \t\n'
 def is_id_char(c):
     return c in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/'
 def is_keyword(id):

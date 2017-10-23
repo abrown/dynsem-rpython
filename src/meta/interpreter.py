@@ -84,13 +84,18 @@ class Interpreter:
             Interpreter.bind(intermediate_term, premise.right, context)
         elif isinstance(premise, CasePremise):
             value = self.resolve(premise.left, context)
+            found = None
             for i in range(len(premise.values)):
                 if premise.values[i] is None:  # otherwise branch
-                    self.evaluate_premise(premise.premises[i], context)
+                    found = premise.values[i]
+                    break
                 elif premise.values[i].matches(value):
-                    self.evaluate_premise(premise.premises[i], context)
-                else:
-                    raise InterpreterError("Unable to find matching branch in case statement: %s" % str(premise))
+                    found = premise.premises[i]
+                    break
+            if found:
+                self.evaluate_premise(found, context)
+            if not found:
+                raise InterpreterError("Unable to find matching branch in case statement: %s" % str(premise))
         else:
             raise NotImplementedError
 
@@ -114,20 +119,19 @@ class Interpreter:
     def resolve(self, term, context):
         """Using a context, resolve the names of free variables in a pattern to create a new term; TODO make this
         non-static?"""
+        resolved = term
         if isinstance(term, VarTerm) and term.name in context:
-            return context[term.name]
+            resolved = context[term.name]
         elif isinstance(term, ApplTerm):
-            native = self.find_native_function(term)
-            if native:
-                return self.resolve_native(native, term, context)
-            else:
-                return self.resolve_appl(term, context)
+            resolved = self.resolve_appl(term, context)
         elif isinstance(term, ListTerm):
-            return self.resolve_list(term, context)
-        else:
-            return term
+            resolved = self.resolve_list(term, context)
 
-    def resolve_native(self, native, term, context):
+        return self.resolve_native(resolved, context)
+
+    def resolve_native(self, term, context):
+        native = self.find_native_function(term)
+        if not native: return term
         args = []
         for arg in term.args:
             resolved = self.resolve(arg, context).number  # TODO need to determine what type of term to use, not hard-code this
