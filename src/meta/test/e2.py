@@ -35,6 +35,45 @@ class TestE2(unittest.TestCase):
         self.assertEqual(result, ApplTerm("block"))
         self.assertEqual(len(result.args), 0)
 
+    def test_sumprimes(self):
+        program = """
+        /* sum up all primes in [2..max], using 
+            inefficient algorithm from lecture 1. */
+        block([
+          assign(max, 50),
+          assign(s, 0),
+          assign(n, 2),
+          while(leq(retrieve(n), retrieve(max)),
+            block([
+              assign(p, 1),  /* flag indicating primeness: initialize to true */
+              assign(d, 2),
+              while(leq(retrieve(d), sub(retrieve(n), 1)),
+                block([           /* we have no mod operator... */
+                  assign(m, mul(retrieve(d), div(retrieve(n), retrieve(d)))), 
+                  ifz(leq(retrieve(n), retrieve(m)),  /* always have m <= n */
+                    assign(p, 0),  /* i.e., n = m, so d divides n, so set p false */
+                    block()  /* (block) is a no-op */
+                  ), 
+                  assign(d, sum(retrieve(d), 1))
+                ])
+              ),
+              ifz(retrieve(p), 
+                assign(s, sum(retrieve(s), retrieve(n))), 
+                block()
+              ),
+              assign(n, sum(retrieve(n), 1))
+            ])
+          ),
+          write(retrieve(s))
+        ])
+        """
+
+        term = Parser.term(program)
+        #result = Interpreter(2).interpret(e2, term)
+
+        #self.assertEqual(result, ApplTerm("block"))
+        #self.assertEqual(len(result.args), 0)
+
 
 if __name__ == '__main__':
     unittest.main()

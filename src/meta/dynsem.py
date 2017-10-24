@@ -11,11 +11,14 @@ class Module:
 
 
 class Transformation:
-    def __init__(self, before):
-        self.before = before
+    def to_string(self):
+        return self.__str__()
 
     def matches(self, term):
         return self.before.matches(term)
+
+    def __init__(self, before):
+        self.before = before
 
     def __repr__(self):
         return self.__str__()

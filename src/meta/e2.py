@@ -12,12 +12,12 @@ e2.rules.append(Parser.rule("while2(cond, 0, then) --> 0"))
 e2.rules.append(Parser.rule("while2(cond, value, then) --> while(cond, then) where then --> ignored"))
 
 
-def write(s):
+def write(s, unused):
     print(s)
-    return None
+    return 0
 
 
-e2.native_functions.append(NativeFunction(Parser.term("write(x)"), write))
+e2.native_functions.append(NativeFunction(Parser.term("write(x)"), write))  # TODO rpython demands it
 e2.native_functions.append(NativeFunction(Parser.term("add(x, y)"), lambda x, y: x + y))
 e2.native_functions.append(NativeFunction(Parser.term("sub(x, y)"), lambda x, y: x - y))
 e2.native_functions.append(NativeFunction(Parser.term("mul(x, y)"), lambda x, y: x * y))

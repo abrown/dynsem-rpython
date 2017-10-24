@@ -1,17 +1,21 @@
-from dynsem import Module
-from interpreter import Interpreter
-from parser import Parser
+from src.meta.e2 import e2
+from src.meta.interpreter import Interpreter
+from src.meta.parser import Parser
 
 
 def main(argv):
-    mod = Module()
-    mod.rules.append(Parser.rule("a() --> b()"))
-    mod.rules.append(Parser.rule("b() --> c()"))
-    mod.rules.append(Parser.rule("c() --> d()"))
-
-    term = Parser.term("a()")
-
-    Interpreter().interpret(mod, term, True)
+    program = Parser.term("""
+    block([
+      assign(a, 0),
+      while(leq(retrieve(a), 10),
+        block([
+          assign(a, add(retrieve(a), 1)), 
+          write(retrieve(a))
+        ])
+      )
+    ])
+    """)
+    Interpreter(1).interpret(e2, program)
     return 0
 
 

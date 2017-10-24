@@ -9,15 +9,17 @@ class InterpreterError(Exception):
 
 
 class Interpreter:
-    def __init__(self):
+    def __init__(self, debug=0):
         self.environment = {}
-        self.module = None
+        self.module = None  # TODO remove this as a parameter from interpret()
+        self.debug = debug
+        self.nesting = 0
 
-    def interpret(self, mod, term, debug=False):
+    def interpret(self, mod, term):
         self.module = mod
 
         while term is not None:
-            if debug: print(str(term.as_string()))
+            if self.debug: print("Term: %s" % term.to_string())
 
             # attempt rule transform
             rule = self.find_rule(term)
@@ -35,7 +37,7 @@ class Interpreter:
                         for arg in term.args:
                             args.append(self.interpret(mod, arg))
                         interpreted_term = ApplTerm(term.name, args)
-                        if interpreted_term == term: break  # no change detected after interpreting sub-terms
+                        if interpreted_term.equals(term): break  # no change detected after interpreting sub-terms
                         term = interpreted_term
                     else:
                         break  # no need to interpret sub-terms TODO list?
@@ -55,6 +57,7 @@ class Interpreter:
         return None
 
     def transform(self, term, rule):
+        if self.debug > 1: print("Rule: %s" % rule.to_string())
         context = Context()
         # for component in rule.components:
         # context.bind(component, self.environment) # TODO re-enable when we can bind the environment name to the context
@@ -90,7 +93,9 @@ class Interpreter:
 
     def evaluate_premise(self, premise, context):
         if isinstance(premise, EqualityCheckPremise):
-            if context.resolve(premise.left) != context.resolve(premise.right):
+            left_term = context.resolve(premise.left)
+            right_term = context.resolve(premise.right)
+            if not left_term.equals(right_term):
                 raise InterpreterError("Expected %s to equal %s" % (premise.left, premise.right))
         elif isinstance(premise, PatternMatchPremise):
             if premise.right.matches(premise.left):
@@ -125,6 +130,7 @@ class Interpreter:
             raise NotImplementedError
 
     def resolve_native(self, term, native_function):
+        if self.debug > 1: print("Native: %s" % native_function.to_string())
         context = Context()
         context.bind(native_function.before, term)
 
@@ -134,5 +140,9 @@ class Interpreter:
             interpreted = self.interpret(self.module, resolved)  # TODO need to determine what type of term to use, not hard-code this
             if not isinstance(interpreted, IntTerm): raise InterpreterError("Expected parameter %s of %s to resolve to an IntTerm but was: %s" % (resolved, native_function, interpreted))
             args.append(interpreted.number)
-        result = native_function.action(*args)
+
+        if(len(args) < 2): args.append(0)
+        tuple_args = (args[0], args[1])  # TODO RPython demands this
+
+        result = native_function.action(*tuple_args)
         return IntTerm(result)  # TODO need to determine what type of term to use, not hard-code this
