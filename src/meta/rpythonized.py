@@ -15,7 +15,7 @@ def main(argv):
       )
     ])
     """)
-    Interpreter(1).interpret(e2, program)
+    Interpreter(e2, 1).interpret(program)
     return 0
 
 

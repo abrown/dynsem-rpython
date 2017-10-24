@@ -9,15 +9,13 @@ class InterpreterError(Exception):
 
 
 class Interpreter:
-    def __init__(self, debug=0):
+    def __init__(self, module, debug=0):
         self.environment = {}
-        self.module = None  # TODO remove this as a parameter from interpret()
+        self.module = module
         self.debug = debug
         self.nesting = 0
 
-    def interpret(self, mod, term):
-        self.module = mod
-
+    def interpret(self, term):
         while term is not None:
             if self.debug: print("Term: %s" % term.to_string())
 
@@ -35,7 +33,7 @@ class Interpreter:
                     if isinstance(term, ApplTerm):
                         args = []
                         for arg in term.args:
-                            args.append(self.interpret(mod, arg))
+                            args.append(self.interpret(arg))
                         interpreted_term = ApplTerm(term.name, args)
                         if interpreted_term.equals(term): break  # no change detected after interpreting sub-terms
                         term = interpreted_term
@@ -80,7 +78,7 @@ class Interpreter:
                 value = rule.after.assignments[key]
                 resolved_key = context.resolve(VarTerm(key))
                 if not isinstance(resolved_key, VarTerm): raise InterpreterError("Expected a VarTerm to use as the environment name but found: %s" % resolved_key)
-                interpreted_value = self.interpret(self.module, context.resolve(value))
+                interpreted_value = self.interpret(context.resolve(value))
                 new_environment[resolved_key.name] = interpreted_value
             # save the new environment TODO there could be multiple
             self.environment = new_environment
@@ -93,6 +91,7 @@ class Interpreter:
 
     def evaluate_premise(self, premise, context):
         if isinstance(premise, EqualityCheckPremise):
+            # TODO interpret each side here
             left_term = context.resolve(premise.left)
             right_term = context.resolve(premise.right)
             if not left_term.equals(right_term):
@@ -110,7 +109,7 @@ class Interpreter:
                                        "support for constructor assignment (e.g. a(1, 2) => a(x, y))")
         elif isinstance(premise, ReductionPremise):
             intermediate_term = context.resolve(premise.left)
-            new_term = self.interpret(self.module, intermediate_term)
+            new_term = self.interpret(intermediate_term)
             context.bind(premise.right, new_term)
         elif isinstance(premise, CasePremise):
             value = context.resolve(premise.left)
@@ -137,7 +136,7 @@ class Interpreter:
         args = []
         for arg in native_function.before.args:
             resolved = context.resolve(arg)
-            interpreted = self.interpret(self.module, resolved)  # TODO need to determine what type of term to use, not hard-code this
+            interpreted = self.interpret(resolved)  # TODO need to determine what type of term to use, not hard-code this
             if not isinstance(interpreted, IntTerm): raise InterpreterError("Expected parameter %s of %s to resolve to an IntTerm but was: %s" % (resolved, native_function, interpreted))
             args.append(interpreted.number)
 

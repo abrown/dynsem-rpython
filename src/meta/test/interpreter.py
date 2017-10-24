@@ -12,7 +12,7 @@ class TestInterpreter(unittest.TestCase):
         mod.rules.append(Rule(Parser.term("a(x)"), Parser.term("b"), [Parser.premise("x == 1")]))
         term = Parser.term("a(1)")
 
-        result = Interpreter().interpret(mod, term)
+        result = Interpreter(mod).interpret(term)
 
         self.assertEqual(result, Parser.term("b"))
 
@@ -23,7 +23,7 @@ class TestInterpreter(unittest.TestCase):
         mod.rules.append(Parser.rule("c() --> d()"))
         term = Parser.term("a()")
 
-        result = Interpreter().interpret(mod, term)
+        result = Interpreter(mod).interpret(term)
 
         self.assertEqual(result, Parser.term("d()"))
 
@@ -33,14 +33,14 @@ class TestInterpreter(unittest.TestCase):
         term = Parser.term("a()")
 
         with self.assertRaises(InterpreterError):
-            Interpreter().interpret(mod, term)  # does not know where to go when 1 != 2
+            Interpreter(mod).interpret(term)  # does not know where to go when 1 != 2
 
     def test_transformation_of_result(self):
         mod = Module()
         mod.rules.append(Parser.rule("a() --> b where b => 2"))
         term = Parser.term("a()")
 
-        result = Interpreter().interpret(mod, term)
+        result = Interpreter(mod).interpret(term)
 
         self.assertEqual(result, IntTerm(2))
 
@@ -48,10 +48,10 @@ class TestInterpreter(unittest.TestCase):
         mod = Module()
         mod.rules.append(Parser.rule("E |- bindVar(k, v) --> {k |--> v, E}"))
         term = Parser.term("bindVar(a, 1)")
-        sut = Interpreter()
+        sut = Interpreter(mod)
         sut.environment = {'a': IntTerm(42)}  # this should be overwritten
 
-        result = sut.interpret(mod, term)
+        result = sut.interpret(term)
 
         self.assertIsInstance(result, EnvWriteTerm)
         self.assertEqual(IntTerm(1), sut.environment["a"])
@@ -60,10 +60,10 @@ class TestInterpreter(unittest.TestCase):
         mod = Module()
         mod.rules.append(Parser.rule("E |- read(y) --> E[y]"))
         term = Parser.term("read(y)")
-        sut = Interpreter()
+        sut = Interpreter(mod)
         sut.environment["y"] = 42
 
-        result = sut.interpret(mod, term)
+        result = sut.interpret(term)
 
         self.assertEqual(result, 42)
 
@@ -73,7 +73,7 @@ class TestInterpreter(unittest.TestCase):
         mod.rules.append(Parser.rule("a(x) --> y where x --> y"))
         term = Parser.term("a(b())")
 
-        result = Interpreter().interpret(mod, term)
+        result = Interpreter(mod).interpret(term)
 
         self.assertEqual(result, ApplTerm("c"))
 
@@ -82,7 +82,7 @@ class TestInterpreter(unittest.TestCase):
         mod.rules.append(Parser.rule("block([x | xs]) --> block(xs)"))
         term = Parser.term("block([1, 2, 3, 4])")
 
-        result = Interpreter().interpret(mod, term)
+        result = Interpreter(mod).interpret(term)
 
         self.assertEqual(result, ApplTerm("block"))
 
@@ -92,7 +92,7 @@ class TestInterpreter(unittest.TestCase):
         mod.native_functions.append(NativeFunction(Parser.term("add(x, y)"), lambda x, y: x + y))
         term = Parser.term("a(1)")
 
-        result = Interpreter().interpret(mod, term)
+        result = Interpreter(mod).interpret(term)
 
         self.assertEqual(result, IntTerm(2))
 
