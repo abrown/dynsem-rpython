@@ -46,14 +46,15 @@ class TestInterpreter(unittest.TestCase):
 
     def test_environment_assignment(self):
         mod = Module()
-        mod.rules.append(Parser.rule("E |- bindVar(x, v) --> {x |--> v, E}"))
-        term = Parser.term("bindVar(x, 1)")
+        mod.rules.append(Parser.rule("E |- bindVar(k, v) --> {k |--> v, E}"))
+        term = Parser.term("bindVar(a, 1)")
         sut = Interpreter()
+        sut.environment = {'a': IntTerm(42)}  # this should be overwritten
 
         result = sut.interpret(mod, term)
 
         self.assertIsInstance(result, EnvWriteTerm)
-        self.assertEqual(IntTerm(1), sut.environment["x"])
+        self.assertEqual(IntTerm(1), sut.environment["a"])
 
     def test_environment_retrieval(self):
         mod = Module()

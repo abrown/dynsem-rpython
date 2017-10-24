@@ -68,18 +68,25 @@ class Interpreter:
         # handle environment changes
         if isinstance(rule.after, EnvWriteTerm):
             new_environment = {}
+            # handle environment cloning first so assignments can overwrite
+            for key in rule.after.assignments:
+                if isinstance(rule.after.assignments[key], EnvWriteTerm):
+                    new_environment.update(self.environment)  # TODO this is an unchecked assumption that {..., E, ...} refers to an E in the semantic components
+            # overwrite with assignments
             for key in rule.after.assignments:
                 value = rule.after.assignments[key]
-                if isinstance(value, EnvWriteTerm):
-                    new_environment.update(
-                        self.environment)  # TODO this is an unchecked assumption that {..., E, ...} refers to an E in the semantic components
-                else:
-                    new_environment[key] = context.resolve(value)
+                resolved_key = context.resolve(VarTerm(key))
+                if not isinstance(resolved_key, VarTerm): raise InterpreterError("Expected a VarTerm to use as the environment name but found: %s" % resolved_key)
+                interpreted_value = self.interpret(self.module, context.resolve(value))
+                new_environment[resolved_key.name] = interpreted_value
+            # save the new environment TODO there could be multiple
             self.environment = new_environment
         elif isinstance(rule.after, EnvReadTerm):
-            return self.environment[rule.after.key]  # TODO this relies on the same unchecked assumption above
+            resolved_key = context.resolve(VarTerm(rule.after.key))
+            return self.environment[resolved_key.name]  # TODO this relies on the same unchecked assumption above
 
-        return context.resolve(rule.after)
+        result = context.resolve(rule.after)
+        return result
 
     def evaluate_premise(self, premise, context):
         if isinstance(premise, EqualityCheckPremise):
@@ -122,9 +129,10 @@ class Interpreter:
         context.bind(native_function.before, term)
 
         args = []
-        for arg in term.args:
+        for arg in native_function.before.args:
             resolved = context.resolve(arg)
             interpreted = self.interpret(self.module, resolved)  # TODO need to determine what type of term to use, not hard-code this
+            if not isinstance(interpreted, IntTerm): raise InterpreterError("Expected parameter %s of %s to resolve to an IntTerm but was: %s" % (resolved, native_function, interpreted))
             args.append(interpreted.number)
         result = native_function.action(*args)
         return IntTerm(result)  # TODO need to determine what type of term to use, not hard-code this
