@@ -1,6 +1,26 @@
 from context import Context
-from src.meta.dynsem import EqualityCheckPremise, PatternMatchPremise, AssignmentPremise, ReductionPremise, CasePremise
-from src.meta.term import ApplTerm, EnvReadTerm, EnvWriteTerm, VarTerm, ListPatternTerm, ListTerm, IntTerm
+from src.meta.term import ApplTerm, EnvReadTerm, EnvWriteTerm, VarTerm, IntTerm
+
+
+# So that you can still run this module under standard CPython, I add this
+# import guard that creates a dummy class instead.
+try:
+    from rpython.rlib.jit import JitDriver, elidable, promote
+except ImportError:
+    class JitDriver(object):
+        def __init__(self,**kw): pass
+        def jit_merge_point(self,**kw): pass
+    def elidable(func): return func
+    def promote(x): return x
+
+def get_location(term) :
+    return "%s" % (term.to_string())
+
+jitdriver = JitDriver(greens=['term'],reds='auto', get_printable_location=get_location)
+
+def jitpolicy(driver):
+    from rpython.jit.codewriter.policy import JitPolicy
+    return JitPolicy()
 
 
 class InterpreterError(Exception):
@@ -18,6 +38,9 @@ class Interpreter:
     def interpret(self, term):
         while term is not None:
             if self.debug: print("Term: %s" % term.to_string())
+
+            # gross attempt at JIT-ting TODO why can't I put a guard in front of this, like 'isinstance(term, ApplTerm) and term.name == "while"'
+            jitdriver.jit_merge_point(term=term)
 
             # attempt rule transform
             rule = self.find_rule(term)

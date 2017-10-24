@@ -7,7 +7,7 @@ def main(argv):
     program = Parser.term("""
     block([
       assign(a, 0),
-      while(leq(retrieve(a), 10),
+      while(leq(retrieve(a), 10000),
         block([
           assign(a, add(retrieve(a), 1)), 
           write(retrieve(a))
@@ -15,7 +15,7 @@ def main(argv):
       )
     ])
     """)
-    Interpreter(e2, 1).interpret(program)
+    Interpreter(e2).interpret(program)
     return 0
 
 

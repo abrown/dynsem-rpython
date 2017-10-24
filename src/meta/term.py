@@ -6,6 +6,7 @@ class Term:
         return True if isinstance(self, VarTerm) else self == term
 
     def equals(self, term):
+        # TODO add to each subclass for rpython
         return isinstance(term, self.__class__)
 
     def __init__(self):

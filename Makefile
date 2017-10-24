@@ -12,5 +12,8 @@ test:
 
 bin/meta: src/meta/rpythonized.py
 	mkdir -p bin
-	PYTHONPATH=. python ${RPYTHON} --log --output=$@ $<
+	PYTHONPATH=. python ${RPYTHON} --log --opt=jit --output=$@ $<
 .PHONY: bin/meta
+
+run: bin/meta
+	PYPYLOG=jit:meta.log $<
