@@ -1,7 +1,7 @@
 import unittest
 
-from src.meta.dynsem import Module, Rule, NativeFunction
-from src.meta.interpreter import Interpreter, InterpreterError
+from src.meta.dynsem import Module, Rule, NativeFunction, DynsemError
+from src.meta.interpreter import Interpreter
 from src.meta.parser import Parser
 from src.meta.term import IntTerm, EnvWriteTerm, ApplTerm
 
@@ -32,7 +32,7 @@ class TestInterpreter(unittest.TestCase):
         mod.rules.append(Parser.rule("a() --> b() where 1 == 2"))
         term = Parser.term("a()")
 
-        with self.assertRaises(InterpreterError):
+        with self.assertRaises(DynsemError):
             Interpreter(mod).interpret(term)  # does not know where to go when 1 != 2
 
     def test_transformation_of_result(self):

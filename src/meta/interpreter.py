@@ -64,7 +64,7 @@ class Interpreter:
         # handle premises
         if rule.premises:
             for premise in rule.premises:
-                self.evaluate_premise(premise, context)
+                premise.evaluate(context, self.interpret)
 
         # handle environment changes
         if isinstance(rule.after, EnvWriteTerm):
@@ -88,45 +88,6 @@ class Interpreter:
 
         result = context.resolve(rule.after)
         return result
-
-    def evaluate_premise(self, premise, context):
-        if isinstance(premise, EqualityCheckPremise):
-            # TODO interpret each side here
-            left_term = context.resolve(premise.left)
-            right_term = context.resolve(premise.right)
-            if not left_term.equals(right_term):
-                raise InterpreterError("Expected %s to equal %s" % (premise.left, premise.right))
-        elif isinstance(premise, PatternMatchPremise):
-            if premise.right.matches(premise.left):
-                context.bind(premise.left, premise.right)
-            else:
-                raise InterpreterError("Expected %s to match %s" % (premise.left, premise.right))
-        elif isinstance(premise, AssignmentPremise):
-            if isinstance(premise.left, VarTerm):
-                context.bind(premise.left, context.resolve(premise.right))
-            else:
-                raise InterpreterError("Cannot assign to anything other than a variable (e.g. x => 2); TODO add " +
-                                       "support for constructor assignment (e.g. a(1, 2) => a(x, y))")
-        elif isinstance(premise, ReductionPremise):
-            intermediate_term = context.resolve(premise.left)
-            new_term = self.interpret(intermediate_term)
-            context.bind(premise.right, new_term)
-        elif isinstance(premise, CasePremise):
-            value = context.resolve(premise.left)
-            found = None
-            for i in range(len(premise.values)):
-                if premise.values[i] is None:  # otherwise branch
-                    found = premise.premises[i]
-                    break
-                elif premise.values[i].matches(value):
-                    found = premise.premises[i]
-                    break
-            if found:
-                self.evaluate_premise(found, context)
-            if not found:
-                raise InterpreterError("Unable to find matching branch in case statement: %s" % str(premise))
-        else:
-            raise NotImplementedError
 
     def resolve_native(self, term, native_function):
         if self.debug > 1: print("Native: %s" % native_function.to_string())
