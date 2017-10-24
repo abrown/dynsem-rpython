@@ -110,6 +110,9 @@ class IntTerm(Term):
     def equals(self, term):
         return isinstance(term, self.__class__) and self.number == term.number
 
+    def matches(self, term):
+        return isinstance(term, IntTerm) and self.number == term.number
+
     def __str__(self):
         return str(self.number)
 
