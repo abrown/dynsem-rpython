@@ -17,3 +17,7 @@ bin/meta: src/meta/rpythonized.py
 
 run: bin/meta
 	PYPYLOG=jit:meta.log $<
+
+disassemble: meta.log
+	PYTHONPATH=3rd/pypy 3rd/pypy/rpython/jit/backend/tool/viewcode.py meta.log
+	# note: his requires `dot` from graphviz (e.g. dnf install graphviz) and pygame (e.g. pip install pygame)
