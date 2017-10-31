@@ -1,9 +1,9 @@
 import unittest
 
+from src.meta.e2 import e2
 from src.meta.interpreter import Interpreter
 from src.meta.parser import Parser
-from src.meta.e2 import e2
-from src.meta.term import ApplTerm
+from src.meta.term import ApplTerm, IntTerm
 
 
 class TestE2(unittest.TestCase):
@@ -23,17 +23,35 @@ class TestE2(unittest.TestCase):
         self.assertEqual(len(result.args), 0)
 
     def test_while(self):
-        term = Parser.term("block(["
-                           "assign(a, 0),"
-                           "while("
-                            "leq(retrieve(a), 10), "
-                            "block([assign(a, add(retrieve(a), 1)), write(retrieve(a))])"
-                           ")])")
+        interpreter = Interpreter(e2)
+        program = """
+        block([
+          assign(a, 0),
+          while(leq(retrieve(a), 10), 
+            block([assign(a, add(retrieve(a), 1)), write(retrieve(a))])
+          )
+        ])
+        """
+        term = Parser.term(program)
+        result = interpreter.interpret(term)
 
-        result = Interpreter(e2).interpret(term)
-
+        self.assertEqual(interpreter.environment['a'], IntTerm(11))
         self.assertEqual(result, ApplTerm("block"))
         self.assertEqual(len(result.args), 0)
+
+    def test_multi_resolution(self):
+        program = """
+        block([
+          assign(a, 0),
+          assign(a, sum(retrieve(a), 1))
+        ])
+        """
+        term = Parser.term(program)
+        interpreter = Interpreter(e2)
+
+        interpreter.interpret(term)
+
+        self.assertEqual(interpreter.environment['a'], IntTerm(2))
 
     def test_sumprimes(self):
         program = """
@@ -69,10 +87,10 @@ class TestE2(unittest.TestCase):
         """
 
         term = Parser.term(program)
-        #result = Interpreter(e2, 2).interpret(term)
+        # result = Interpreter(e2, 2).interpret(term)
 
-        #self.assertEqual(result, ApplTerm("block"))
-        #self.assertEqual(len(result.args), 0)
+        # self.assertEqual(result, ApplTerm("block"))
+        # self.assertEqual(len(result.args), 0)
 
 
 if __name__ == '__main__':
