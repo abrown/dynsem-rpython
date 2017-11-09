@@ -52,8 +52,11 @@ class Rule(Transformation):
     def __str__(self):
         transform = "%s --> %s" % (self.before, self.after)
         if self.premises:
+            premises = []
+            for premise in self.premises:
+                premises.append(premise.to_string())
             transform += " where "
-            transform += "; ".join(map(str, self.premises))
+            transform += "; ".join(premises)
         return transform
 
 
@@ -73,6 +76,9 @@ class Premise:
 
     def evaluate(self, context, interpret):
         raise NotImplementedError()
+
+    def to_string(self):
+        return self.__str__()
 
     def __str__(self):
         return "%s %s %s" % (self.left, "?", self.right)
@@ -129,7 +135,7 @@ class AssignmentPremise(Premise):
             context.bind(self.left, context.resolve(self.right))
         else:
             raise DynsemError("Cannot assign to anything other than a variable (e.g. x => 2); TODO add " +
-                                   "support for constructor assignment (e.g. a(1, 2) => a(x, y))")
+                              "support for constructor assignment (e.g. a(1, 2) => a(x, y))")
 
     def __str__(self):
         return "%s %s %s" % (self.left, "=>", self.right)
@@ -138,7 +144,7 @@ class AssignmentPremise(Premise):
 class ReductionPremise(Premise):
     def __init__(self, left, right):
         Premise.__init__(self, left, right)
-    
+
     def evaluate(self, context, interpret):
         intermediate_term = context.resolve(self.left)
         new_term = interpret(intermediate_term)
@@ -153,7 +159,7 @@ class CasePremise(Premise):
         Premise.__init__(self, left, None)
         self.values = values if values else []
         self.premises = premises if premises else []
-    
+
     def evaluate(self, context, interpret):
         value = context.resolve(self.left)
         found = None
