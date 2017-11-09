@@ -4,6 +4,8 @@ from src.meta.parser import Parser
 
 
 def main(argv):
+    """Run an E2 while-loop as an example"""
+
     program = Parser.term("""
     block([
       assign(a, 0),
@@ -15,6 +17,7 @@ def main(argv):
       )
     ])
     """)
+    
     Interpreter(e2).interpret(program)
     return 0
 

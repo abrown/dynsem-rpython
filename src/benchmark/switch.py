@@ -33,7 +33,7 @@ def interpret(code, operand):
 
 def main(argv):
     if not len(argv) == 2:
-        raise RuntimeError("Expect one numeric argument passed, e.g. program 1000");
+        raise RuntimeError("Expect one numeric argument passed, e.g. program 1000")
 
     program = [1, 3, 2]
     total = int(argv[1])
