@@ -43,7 +43,8 @@ class Parser:
                 self.module.imports = [t.value for t in self.__collect(IdToken)]
             elif keyword == "rules":
                 while True:
-                    if self.__possible(KeywordToken) or self.__possible(EofToken): break
+                    if self.__possible(KeywordToken) or self.__possible(EofToken):
+                        break
                     rule = self.__parse_rule()
                     self.module.rules.append(rule)
             return self.module
@@ -56,41 +57,42 @@ class Parser:
         """Parse all tokens into a Module and return it"""
         while True:
             last = self.next()
-            if last is None: break
+            if last is None:
+                break
         return self.module
 
-    def __collect(self, type):
+    def __collect(self, token_type):
         tokens = []
         while True:
             token = self.tokenizer.next()
-            if not isinstance(token, type):
+            if not isinstance(token, token_type):
                 self.tokenizer.undo(token)
                 break
             tokens.append(token)
         return tokens
 
-    def __expect(self, type):
+    def __expect(self, token_type):
         token = self.tokenizer.next()
-        if not isinstance(token, type):
-            raise ParseError("Expected a token of %s but found something else" % type, token)
+        if not isinstance(token, token_type):
+            raise ParseError("Expected a token of %s but found something else" % token_type, token)
         return token
 
-    def __expect_value(self, type, expected=None):
-        token = self.__expect(type)
+    def __expect_value(self, token_type, expected=None):
+        token = self.__expect(token_type)
         if expected and token.value != expected:
             raise ParseError("Expected a token with value %s but found something else" % str(expected), token)
 
-    def __possible(self, type):
+    def __possible(self, token_type):
         token = self.tokenizer.next()
-        if isinstance(token, type):
+        if isinstance(token, token_type):
             return token
         else:
             self.tokenizer.undo(token)
             return None
 
-    def __possible_value(self, type, expected):
+    def __possible_value(self, token_type, expected):
         token = self.tokenizer.next()
-        if isinstance(token, type) and expected and token.value == expected:
+        if isinstance(token, token_type) and expected and token.value == expected:
             return token
         else:
             self.tokenizer.undo(token)
@@ -103,44 +105,50 @@ class Parser:
         elif isinstance(token, NumberToken):
             return IntTerm(0 if token.value is None else int(token.value))
         elif isinstance(token, LeftBraceToken):
-            return self.__parse_new_environment(token)
+            return self.__parse_new_environment()
         elif isinstance(token, LeftBracketToken):
             return self.__parse_list(token)
         else:
             self.tokenizer.undo(token)
             return None
 
-    def __parse_identifier(self, id):
+    def __parse_identifier(self, ident):
         if self.__possible(LeftParensToken):
             args = []
             while True:
                 arg = self.__parse_term()
-                if arg is None: break
+                if arg is None:
+                    break
                 args.append(arg)
                 self.__possible(CommaToken)
             self.__expect(RightParensToken)
-            return ApplTerm(id.value, args)
+
+            # TODO determine what transformation this ApplTerm points to
+
+            return ApplTerm(ident.value, args)
         if self.__possible(LeftBracketToken):
             name = self.__expect(IdToken)
             self.__expect(RightBracketToken)
-            return EnvReadTerm(id.value, name.value)
+            return EnvReadTerm(ident.value, name.value)
         else:
-            return VarTerm(id.value)
+            return VarTerm(ident.value)
 
-    def __parse_new_environment(self, token):
+    def __parse_new_environment(self):
         assignments = {}
+        environments = []
         while True:
             name = self.__parse_term()
-            if name is None: break
-            if not isinstance(name, VarTerm): raise ParseError("Expected a variable term but found " + str(name), None)
+            if name is None:
+                break
+            if not isinstance(name, VarTerm):
+                raise ParseError("Expected a variable term but found " + str(name), None)
             if self.__possible_value(OperatorToken, "|-->"):
-                value = self.__expect_term()
+                assignments[name.name] = self.__expect_term()
             else:
-                value = EnvWriteTerm()  # TODO this is by "convention" but not necessarily clear
-            assignments[name.name] = value
+                environments.append(name)
             self.__possible(CommaToken)
         self.__expect(RightBraceToken)
-        return EnvWriteTerm(assignments)
+        return EnvWriteTerm(assignments, environments)
 
     def __parse_list(self, token):
         items = []
@@ -148,19 +156,22 @@ class Parser:
         # normal list
         while True:
             term = self.__parse_term()
-            if term is None: break
+            if term is None:
+                break
             items.append(term)
-            if not self.__possible(CommaToken): break
+            if not self.__possible(CommaToken):
+                break
 
         # patternized list
         if self.__possible_value(OperatorToken, "|"):
             for i in items:
-                if not isinstance(i, VarTerm): raise ParseError("Expected list pattern to only include VarTerms", token)
+                if not isinstance(i, VarTerm):
+                    raise ParseError("Expected list pattern to only include VarTerms", token)
             rest = self.__expect_term()
             if not isinstance(rest, VarTerm):
                 raise ParseError("Expected list pattern to only include VarTerms", token)
             self.__expect(RightBracketToken)
-            return ListPatternTerm(items, rest)
+            return ListSyntaxTerm(items, rest)
         else:
             self.__expect(RightBracketToken)
             return ListTerm(items)
@@ -170,6 +181,51 @@ class Parser:
         if term is None:
             raise ParseError("Expected to parse a term", self.tokenizer.next())
         return term
+
+    def __parse_rule(self):
+        before = self.__expect_term()
+
+        # parse semantic components
+        components = []
+        if self.__possible_value(OperatorToken, "|-"):
+            components.append(before)
+            before = self.__expect_term()
+
+        # read body
+        self.__expect_value(OperatorToken, "-->")
+        after = self.__expect_term()
+
+        # parse premises
+        premises = []
+        if self.__possible_value(KeywordToken, "where"):
+            while True:
+                premise = self.__parse_premise()
+                premises.append(premise)
+                if not self.__possible(SemiColonToken):
+                    break
+            self.__possible(PeriodToken)
+
+        rule = Rule(before, after, components, premises)
+
+        # reconcile with constructors
+        # if isinstance(before, ConstTerm):
+        #     appl = before.appl
+        #     if appl.name in self.module.constructors:
+        #         constructor = self.module.constructors[appl.name]
+        #         if len(appl.args) != len(constructor.sorts):
+        #             raise ParseError("Rule arguments do not match constructor", None)
+        #         else:
+        #             constructor.rules.append(rule)
+        #     else:
+        #         self.module.constructors[appl.name] = Constructor(appl.name, [type(a) for a in appl.args], [rule])
+        # if isinstance(after, ApplTerm):
+        #     if after.name in self.module.constructors:
+        #         constructor = self.module.constructors[appl.name]
+        #         #if len(after.args) != len(constructor.sorts):
+        #             # TODO warn about possible mistake in construction
+        #         # TODO link this rule to the next one
+
+        return rule
 
     def __parse_premise(self):
         if self.__possible_value(KeywordToken, "case"):
@@ -205,30 +261,7 @@ class Parser:
                 values.append(self.__expect_term())
             self.__expect_value(OperatorToken, "=>")
             sub_premises.append(self.__parse_premise())
-            if self.__possible(RightBraceToken): break
+            if self.__possible(RightBraceToken):
+                break
 
         return CasePremise(var, values, sub_premises)
-
-    def __parse_rule(self):
-        before = self.__expect_term()
-
-        # parse semantic components
-        components = []
-        if self.__possible_value(OperatorToken, "|-"):
-            components.append(before)
-            before = self.__expect_term()
-
-        # read body
-        self.__expect_value(OperatorToken, "-->")
-        after = self.__expect_term()
-
-        # parse premises
-        premises = []
-        if self.__possible_value(KeywordToken, "where"):
-            while True:
-                premise = self.__parse_premise()
-                premises.append(premise)
-                if not self.__possible(SemiColonToken): break
-            self.__possible(PeriodToken)
-
-        return Rule(before, after, components, premises)

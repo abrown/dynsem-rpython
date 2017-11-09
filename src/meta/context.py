@@ -1,4 +1,4 @@
-from src.meta.term import VarTerm, ListPatternTerm, ListTerm, ApplTerm
+from src.meta.term import VarTerm, ListSyntaxTerm, ListTerm, ApplTerm
 
 
 class ContextError(Exception):
@@ -15,7 +15,7 @@ class Context:
         non-static?"""
         if isinstance(pattern, VarTerm):
             self.map[pattern.name] = term
-        elif isinstance(pattern, ListPatternTerm):
+        elif isinstance(pattern, ListSyntaxTerm):
             for i in range(len(pattern.vars)):
                 self.map[pattern.vars[i].name] = term.items[i]
             rest = term.items[len(pattern.vars):]

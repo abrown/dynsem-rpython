@@ -69,7 +69,8 @@ class TestParser(unittest.TestCase):
         rule = Parser.rule("E |- bindVar(x, v) --> {x |--> v, E}")
 
         self.assertIsInstance(rule.after, EnvWriteTerm)
-        self.assertEqual(2, len(rule.after.assignments))
+        self.assertEqual(1, len(rule.after.assignments))
+        self.assertEqual(1, len(rule.after.environments))
         self.assertEqual(VarTerm("E"), rule.components[0])
 
     def test_environment_read(self):
