@@ -42,8 +42,8 @@ class TestE2(unittest.TestCase):
     def test_multi_resolution(self):
         program = """
         block([
-          assign(a, 0),
-          assign(a, sum(retrieve(a), 1))
+          assign(a, 1),
+          assign(a, add(retrieve(a), 1))
         ])
         """
         term = Parser.term(program)
