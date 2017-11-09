@@ -21,5 +21,5 @@ e2.native_functions.append(NativeFunction(Parser.term("write(x)"), write))  # TO
 e2.native_functions.append(NativeFunction(Parser.term("add(x, y)"), lambda x, y: x + y))
 e2.native_functions.append(NativeFunction(Parser.term("sub(x, y)"), lambda x, y: x - y))
 e2.native_functions.append(NativeFunction(Parser.term("mul(x, y)"), lambda x, y: x * y))
-e2.native_functions.append(NativeFunction(Parser.term("div(x, y)"), lambda x, y: x / y))
+e2.native_functions.append(NativeFunction(Parser.term("div(x, y)"), lambda x, y: x // y))
 e2.native_functions.append(NativeFunction(Parser.term("leq(x, y)"), lambda x, y: int(x <= y)))

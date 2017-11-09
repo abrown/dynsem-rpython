@@ -72,14 +72,14 @@ class TestE2(unittest.TestCase):
                     assign(p, 0),  /* i.e., n = m, so d divides n, so set p false */
                     block()  /* (block) is a no-op */
                   ), 
-                  assign(d, sum(retrieve(d), 1))
+                  assign(d, add(retrieve(d), 1))
                 ])
               ),
               ifz(retrieve(p), 
-                assign(s, sum(retrieve(s), retrieve(n))), 
+                assign(s, add(retrieve(s), retrieve(n))), 
                 block()
               ),
-              assign(n, sum(retrieve(n), 1))
+              assign(n, add(retrieve(n), 1))
             ])
           ),
           write(retrieve(s))
@@ -87,10 +87,13 @@ class TestE2(unittest.TestCase):
         """
 
         term = Parser.term(program)
-        # result = Interpreter(e2, 2).interpret(term)
+        interpreter = Interpreter(e2)
 
-        # self.assertEqual(result, ApplTerm("block"))
-        # self.assertEqual(len(result.args), 0)
+        # TODO fix that E somehow gets saved on the environment
+        interpreter.interpret(term)
+
+        # 328 seems about right: http://www.wolframalpha.com/input/?i=sum+primes+up+to+50&x=0&y=0
+        self.assertEqual(interpreter.environment["s"], IntTerm(328))
 
 
 if __name__ == '__main__':
