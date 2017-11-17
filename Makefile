@@ -13,15 +13,15 @@ test:
 bin/e2: src/main/e2.py
 	mkdir -p bin
 	PYTHONPATH=. python ${RPYTHON} --log --opt=jit --output=$@ $<
-.PHONY: bin/meta
+#.PHONY: bin/e2
 
 bin/while: src/main/while.py
 	mkdir -p bin
 	PYTHONPATH=. python ${RPYTHON} --log --opt=jit --output=$@ $<
-.PHONY: bin/meta
+#.PHONY: bin/while
 
-run: bin/while
-	PYPYLOG=jit:while.log $<
+run: bin/e2
+	PYPYLOG=jit:e2.log $<
 
 disassemble: while.log
 	PYTHONPATH=3rd/pypy 3rd/pypy/rpython/jit/backend/tool/viewcode.py meta.log
