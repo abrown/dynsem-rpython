@@ -21,8 +21,8 @@ bin/while: src/main/while.py
 #.PHONY: bin/while
 
 run: bin/e2
-	PYPYLOG=jit:e2.log $<
+	PYPYLOG=jit:e2.log $< src/main/sumprimes.e2
 
-disassemble: while.log
-	PYTHONPATH=3rd/pypy 3rd/pypy/rpython/jit/backend/tool/viewcode.py meta.log
+disassemble: e2.log
+	PYTHONPATH=3rd/pypy 3rd/pypy/rpython/jit/backend/tool/viewcode.py $<
 	# note: his requires `dot` from graphviz (e.g. dnf install graphviz) and pygame (e.g. pip install pygame)
