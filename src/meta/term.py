@@ -1,7 +1,9 @@
-class Term:
+class Printable:
     def to_string(self):
         return self.__str__()
 
+
+class Term(Printable):
     def matches(self, term):
         return True if isinstance(self, VarTerm) else self == term
 

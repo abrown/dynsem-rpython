@@ -1,4 +1,5 @@
 from src.meta.term import VarTerm
+from src.meta.term import Printable
 
 
 class DynsemError(Exception):
@@ -18,10 +19,7 @@ class Module:
         self.rules = []
 
 
-class Transformation:
-    def to_string(self):
-        return self.__str__()
-
+class Transformation(Printable):
     def matches(self, term):
         return self.before.matches(term)
 

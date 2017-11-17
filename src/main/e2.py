@@ -23,15 +23,26 @@ def read_file(filename):
 def main(argv):
     """Parse and run any E2 program"""
 
+    # parse input program
     try:
         file = argv[1]
     except IndexError:
-        raise RuntimeError("Expect one file name argument passed, e.g. ./e2 program.e2")
-
+        print("Expected one file name argument to be passed, e.g. ./e2 program.e2")
+        raise RuntimeError
     program_contents = read_file(argv[1])
     program = Parser.term(program_contents)
 
-    Interpreter(e2).interpret(program)
+    # set debug level
+    debug_level = 0
+    try:
+        debug_level = int(os.environ['DEBUG'])
+    except KeyError:
+        # there may be a better way to do this but RPython apparently does not allow "'DEBUG' in os.environ"
+        pass
+
+    # run the program
+    Interpreter(e2, debug_level).interpret(program)
+
     return 0
 
 

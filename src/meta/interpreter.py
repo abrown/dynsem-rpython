@@ -48,7 +48,8 @@ class Interpreter:
         self.nesting += 1
 
         while term is not None and isinstance(term, ApplTerm):
-            self.log("Term: %s" % term.to_string())
+            if self.debug:
+                print("Term: %s" % term.to_string())
 
             # TODO need to guard this some way (perhaps with a new node)
             jitdriver.jit_merge_point(term=term)
@@ -56,24 +57,35 @@ class Interpreter:
             # attempt rule transform
             rule = self.find_rule(term)
             if rule:
-                self.log("Rule: %s" % rule.to_string())
+                if self.debug:
+                    print("Rule: %s" % rule.to_string())
                 term = self.transform_rule(term, rule)
             else:
                 # attempt native transform
                 native = self.find_native_function(term)
                 if native:
-                    self.log("Native: %s" % native.to_string())
+                    if self.debug:
+                        print("Native: %s" % native.to_string())
                     term = self.transform_native_function(term, native)
                 else:
-                    self.log("No transformation found, returning")
+                    if self.debug:
+                        print("No transformation found, returning")
                     break  # unable to transform this appl, must be terminal
 
         self.nesting -= 1
         return term
 
-    def log(self, message):
-        if self.debug > 1:
-            print("%s%s" % (" " * self.nesting, message))
+    def to_tuple(self, list):
+        list = list if list else []
+        length = len(list)
+        if length == 0:
+            return ()
+        elif length == 1:
+            return (list[0])
+        elif length == 2:
+            return (list[0], list[1])
+        else:
+            raise NotImplementedError
 
     def interpret_subterms(self, term):
         args = []
