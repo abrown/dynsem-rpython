@@ -1,0 +1,10 @@
+git:
+  depth: 3
+
+matrix:
+  include:
+    - language: python
+      python: 3.6
+      script: make test
+    - language: c
+      script: make bin/e2
