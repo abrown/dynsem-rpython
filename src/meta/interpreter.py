@@ -1,4 +1,4 @@
-from context import Context
+from src.meta.context import Context
 from src.meta.term import ApplTerm, EnvReadTerm, EnvWriteTerm, VarTerm, IntTerm
 
 # So that you can still run this module under standard CPython, I add this

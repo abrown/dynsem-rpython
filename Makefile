@@ -1,10 +1,19 @@
 RPYTHON=3rd/pypy/rpython/bin/rpython
+VERSION=0.1
+IMAGE=dynsem:${VERSION}
 
 # define FAST=1 to avoid the long-compiling JIT option
-ifeq (${FAST}, undefined)
+ifeq (${FAST}, )
 JIT_OPT:=jit
 else
 JIT_OPT:=3
+endif
+
+# setup proxy for Docker
+ifeq (${http_proxy}, )
+PROXY:=
+else
+PROXY:=--build-arg http_proxy=${http_proxy} --build-arg https_proxy=${https_proxy}
 endif
 
 all: test
@@ -32,5 +41,12 @@ disassemble: e2.log
 	PYTHONPATH=3rd/pypy 3rd/pypy/rpython/jit/backend/tool/viewcode.py $<
 	# note: his requires `dot` from graphviz (e.g. dnf install graphviz) and pygame (e.g. pip install pygame)
 
+docker: Dockerfile $(shell find src/meta/*.py)
+	docker build ${PROXY} --tag ${IMAGE} .
+
+docker-run: docker
+	docker run -it --rm ${IMAGE}
+
 clean:
 	rm -rf bin
+	docker rmi ${IMAGE}
