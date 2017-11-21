@@ -4,7 +4,7 @@ from src.meta.term import ApplTerm, EnvReadTerm, EnvWriteTerm, VarTerm, IntTerm
 # So that you can still run this module under standard CPython, I add this
 # import guard that creates a dummy class instead.
 try:
-    from rpython.rlib.jit import JitDriver, elidable, promote
+    from rpython.rlib.jit import JitDriver, elidable, promote, unroll_safe
 except ImportError:
     class JitDriver(object):
         def __init__(self, **kw): pass
@@ -20,6 +20,10 @@ except ImportError:
         return x
 
 
+    def unroll_safe(func):
+        return func
+
+
 def get_location(term):
     return "%s" % (term.to_string())
 
@@ -28,8 +32,11 @@ jitdriver = JitDriver(greens=['term'], reds='auto', get_printable_location=get_l
 
 
 def jitpolicy(driver):
-    from rpython.jit.codewriter.policy import JitPolicy
-    return JitPolicy()
+    try:
+        from rpython.jit.codewriter.policy import JitPolicy
+        return JitPolicy()
+    except ImportError:
+        raise NotImplemented("Abandon if we are unable to use RPython's JitPolicy")
 
 
 class InterpreterError(Exception):
@@ -105,6 +112,7 @@ class Interpreter:
                 return native
         return None
 
+    @unroll_safe
     def transform_rule(self, term, rule):
         context = Context()
         # for component in rule.components:
@@ -143,6 +151,7 @@ class Interpreter:
         result = context.resolve(rule.after)
         return result
 
+    @unroll_safe
     def transform_native_function(self, term, native_function):
         context = Context()
         context.bind(native_function.before, term)

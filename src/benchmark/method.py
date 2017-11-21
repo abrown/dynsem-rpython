@@ -45,9 +45,10 @@ class Add3Exp(Exp):
 
 def main(argv):
     if not len(argv) == 2:
-        raise RuntimeError("Expect one numeric argument passed, e.g. program 1000");
+        raise RuntimeError("Expect one numeric argument passed, e.g. program 1000")
 
     program = [Add1Exp(), Add3Exp(), Add2Exp()]
+    promote(program)
     total = int(argv[1])
     accumulator = 0
     for i in range(0, total):
