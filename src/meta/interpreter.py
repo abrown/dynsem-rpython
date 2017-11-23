@@ -45,6 +45,8 @@ class InterpreterError(Exception):
 
 
 class Interpreter:
+    _immutable_fields_ = ['module', 'debug']
+
     def __init__(self, dynsem_module, debug=0):
         self.environment = {}
         self.module = dynsem_module
@@ -52,7 +54,8 @@ class Interpreter:
         self.nesting = -1
 
     def interpret(self, term):
-        self.nesting += 1
+        if self.debug:
+            self.nesting += 1
 
         while term is not None and isinstance(term, ApplTerm):
             if self.debug:
@@ -79,7 +82,8 @@ class Interpreter:
                         print("No transformation found, returning")
                     break  # unable to transform this appl, must be terminal
 
-        self.nesting -= 1
+        if self.debug:
+            self.nesting -= 1
         return term
 
     def to_tuple(self, list):
