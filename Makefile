@@ -38,6 +38,9 @@ E2_LOG=e2-$(shell date +%s).log
 run: bin/e2
 	PYPYLOG=jit:${E2_LOG} time $< src/main/sumprimes.e2
 
+show-last-log:
+	less $(shell ls e2-*.log | tail -n 1)
+
 disassemble: e2.log
 	PYTHONPATH=3rd/pypy 3rd/pypy/rpython/jit/backend/tool/viewcode.py $<
 	# note: his requires `dot` from graphviz (e.g. dnf install graphviz) and pygame (e.g. pip install pygame)
