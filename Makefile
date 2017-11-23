@@ -34,8 +34,9 @@ bin/while: src/main/while.py $(shell find src/meta/*.py)
 	mkdir -p bin
 	PYTHONPATH=. python ${RPYTHON} --log --opt=${JIT_OPT} --output=$@ $<
 
+E2_LOG=e2-$(shell date +%s).log
 run: bin/e2
-	PYPYLOG=jit:e2.log time $< src/main/sumprimes.e2
+	PYPYLOG=jit:${E2_LOG} time $< src/main/sumprimes.e2
 
 disassemble: e2.log
 	PYTHONPATH=3rd/pypy 3rd/pypy/rpython/jit/backend/tool/viewcode.py $<
@@ -48,5 +49,6 @@ docker-run: docker
 	docker run -it --rm ${IMAGE}
 
 clean:
+	rm *.log
 	rm -rf bin
 	docker rmi ${IMAGE}

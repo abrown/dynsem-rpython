@@ -7,6 +7,7 @@ stages:
 
 before_script:
   - python -V # Print out python version for debugging
+  - apt update && apt install time
   - make 3rd
 
 test:
@@ -15,15 +16,12 @@ test:
 
 compile:
   stage: prepare
-  script: make bin/e2
+  script: make run
   artifacts:
     paths: 
       - bin/e2
+      - e2-*.log
 
 benchmark:
   stage: benchmark
-  script: time make run
-  artifacts:
-    paths:
-      - e2.log
-
+  script: cat e2-*.log
