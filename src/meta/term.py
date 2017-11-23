@@ -1,6 +1,4 @@
-class Printable:
-    def to_string(self):
-        return self.__str__()
+from src.meta.printable import Printable
 
 
 class Term(Printable):
@@ -13,12 +11,6 @@ class Term(Printable):
 
     def __init__(self):
         pass
-
-    def __str__(self):
-        return self.__class__.__name__
-
-    def __repr__(self):
-        return self.__str__()
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -51,7 +43,7 @@ class ApplTerm(Term):
             if not self.args[i].equals(term.args[i]): return False
         return True
 
-    def __str__(self):
+    def to_string(self):
         args = []
         for a in self.args:
             args.append(str(a))
@@ -77,7 +69,7 @@ class ListTerm(Term):
             if not self.items[i].equals(term.items[i]): return False
         return True
 
-    def __str__(self):
+    def to_string(self):
         args = []
         for a in self.items:
             args.append(str(a))
@@ -98,7 +90,7 @@ class ListPatternTerm(Term):
         else:
             return True
 
-    def __str__(self):
+    def to_string(self):
         args = []
         for a in self.vars:
             args.append(str(a))
@@ -116,7 +108,7 @@ class IntTerm(Term):
     def matches(self, term):
         return isinstance(term, IntTerm) and self.number == term.number
 
-    def __str__(self):
+    def to_string(self):
         return str(self.number)
 
 
@@ -128,7 +120,7 @@ class VarTerm(Term):
     def equals(self, term):
         return isinstance(term, self.__class__) and self.name == term.name
 
-    def __str__(self):
+    def to_string(self):
         return str(self.name)
 
 
@@ -138,7 +130,7 @@ class EnvWriteTerm(Term):
         Term.__init__(self)
         self.assignments = assignments if assignments else {}
 
-    def __str__(self):
+    def to_string(self):
         args = []
         for key in self.assignments:
             if isinstance(self.assignments[key], EnvWriteTerm):
@@ -155,5 +147,5 @@ class EnvReadTerm(Term):
         self.name = name  # the environment name
         self.key = key  # the name to retrieve from it
 
-    def __str__(self):
+    def to_string(self):
         return "%s[%s]" % (self.name, self.key)

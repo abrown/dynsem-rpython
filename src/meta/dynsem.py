@@ -1,5 +1,5 @@
 from src.meta.term import VarTerm
-from src.meta.term import Printable
+from src.meta.printable import Printable
 
 
 class DynsemError(Exception):
@@ -20,14 +20,11 @@ class Module:
 
 
 class Transformation(Printable):
-    def matches(self, term):
-        return self.before.matches(term)
-
     def __init__(self, before):
         self.before = before
 
-    def __repr__(self):
-        return self.__str__()
+    def matches(self, term):
+        return self.before.matches(term)
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -47,7 +44,7 @@ class Rule(Transformation):
         self.components = components if components else []
         self.premises = premises if premises else []
 
-    def __str__(self):
+    def to_string(self):
         transform = "%s --> %s" % (self.before, self.after)
         if self.premises:
             premises = []
@@ -63,11 +60,11 @@ class NativeFunction(Transformation):
         Transformation.__init__(self, before)
         self.action = action
 
-    def __str__(self):
+    def to_string(self):
         return "%s --> [native function]" % self.before
 
 
-class Premise:
+class Premise(Printable):
     def __init__(self, left, right):
         self.left = left
         self.right = right
@@ -76,13 +73,7 @@ class Premise:
         raise NotImplementedError()
 
     def to_string(self):
-        return self.__str__()
-
-    def __str__(self):
         return "%s %s %s" % (self.left, "?", self.right)
-
-    def __repr__(self):
-        return self.__str__()
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -105,7 +96,7 @@ class PatternMatchPremise(Premise):
         else:
             raise DynsemError("Expected %s to match %s" % (self.left, self.right))
 
-    def __str__(self):
+    def to_string(self):
         return "%s %s %s" % (self.left, "=>", self.right)
 
 
@@ -120,7 +111,7 @@ class EqualityCheckPremise(Premise):
         if not left_term.equals(right_term):
             raise DynsemError("Expected %s to equal %s" % (self.left, self.right))
 
-    def __str__(self):
+    def to_string(self):
         return "%s %s %s" % (self.left, "==", self.right)
 
 
@@ -135,7 +126,7 @@ class AssignmentPremise(Premise):
             raise DynsemError("Cannot assign to anything other than a variable (e.g. x => 2); TODO add " +
                               "support for constructor assignment (e.g. a(1, 2) => a(x, y))")
 
-    def __str__(self):
+    def to_string(self):
         return "%s %s %s" % (self.left, "=>", self.right)
 
 
@@ -148,7 +139,7 @@ class ReductionPremise(Premise):
         new_term = interpret(intermediate_term)
         context.bind(self.right, new_term)
 
-    def __str__(self):
+    def to_string(self):
         return "%s %s %s" % (self.left, "-->", self.right)
 
 
@@ -173,5 +164,5 @@ class CasePremise(Premise):
         if not found:
             raise DynsemError("Unable to find matching branch in case statement: %s" % str(self))
 
-    def __str__(self):
+    def to_string(self):
         return "case %s of {...}" % self.left
