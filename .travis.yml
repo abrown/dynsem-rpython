@@ -7,4 +7,7 @@ matrix:
       python: 3.6
       script: make test
     - language: c
-      script: make bin/e2
+      script:
+        - make bin/e2
+        - make run
+        - cat e2.log

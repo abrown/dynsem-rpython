@@ -35,7 +35,7 @@ bin/while: src/main/while.py $(shell find src/meta/*.py)
 	PYTHONPATH=. python ${RPYTHON} --log --opt=${JIT_OPT} --output=$@ $<
 
 run: bin/e2
-	PYPYLOG=jit:e2.log $< src/main/sumprimes.e2
+	PYPYLOG=jit:e2.log time $< src/main/sumprimes.e2
 
 disassemble: e2.log
 	PYTHONPATH=3rd/pypy 3rd/pypy/rpython/jit/backend/tool/viewcode.py $<
