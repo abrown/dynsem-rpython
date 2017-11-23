@@ -46,7 +46,7 @@ class ApplTerm(Term):
     def to_string(self):
         args = []
         for a in self.args:
-            args.append(str(a))
+            args.append(a.to_string())
         return self.name if not self.args else "%s(%s)" % (self.name, ", ".join(args))
 
 
@@ -72,7 +72,7 @@ class ListTerm(Term):
     def to_string(self):
         args = []
         for a in self.items:
-            args.append(str(a))
+            args.append(a.to_string())
         return "[%s]" % (", ".join(args))
 
 
@@ -93,7 +93,7 @@ class ListPatternTerm(Term):
     def to_string(self):
         args = []
         for a in self.vars:
-            args.append(str(a))
+            args.append(a.to_string())
         return "[%s | %s]" % (", ".join(args), self.rest)
 
 

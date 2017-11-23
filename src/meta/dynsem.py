@@ -44,7 +44,7 @@ class Rule(Transformation):
         self.premises = premises if premises else []
 
     def to_string(self):
-        transform = "%s --> %s" % (self.before, self.after)
+        transform = "%s --> %s" % (self.before.to_string(), self.after.to_string())
         if self.premises:
             premises = []
             for premise in self.premises:
@@ -60,7 +60,7 @@ class NativeFunction(Transformation):
         self.action = action
 
     def to_string(self):
-        return "%s --> [native function]" % self.before
+        return "%s --> [native function]" % self.before.to_string()
 
 
 class Premise(Printable):
