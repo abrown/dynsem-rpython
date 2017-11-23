@@ -116,7 +116,6 @@ class Interpreter:
                 return native
         return None
 
-    @unroll_safe
     def transform_rule(self, term, rule):
         context = Context()
         # for component in rule.components:
@@ -155,7 +154,6 @@ class Interpreter:
         result = context.resolve(rule.after)
         return result
 
-    @unroll_safe
     def transform_native_function(self, term, native_function):
         context = Context()
         context.bind(native_function.before, term)
