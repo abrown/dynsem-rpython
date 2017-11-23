@@ -10,4 +10,4 @@ matrix:
       script:
         - make bin/e2
         - make run
-        - cat e2.log
+        - cat e2-*.log
