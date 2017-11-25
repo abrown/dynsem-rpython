@@ -19,6 +19,8 @@ class Module:
 
 
 class Transformation(Printable):
+    _immutable_fields_ = ['before']
+
     def __init__(self, before):
         self.before = before
 
@@ -37,6 +39,8 @@ class Transformation(Printable):
 
 
 class Rule(Transformation):
+    _immutable_fields_ = ['before', 'after', 'components[*]', 'premises[*]']
+
     def __init__(self, before, after, components=None, premises=None):
         Transformation.__init__(self, before)
         self.after = after
@@ -55,6 +59,8 @@ class Rule(Transformation):
 
 
 class NativeFunction(Transformation):
+    _immutable_fields_ = ['before', 'action']
+
     def __init__(self, before, action):
         Transformation.__init__(self, before)
         self.action = action
@@ -64,6 +70,8 @@ class NativeFunction(Transformation):
 
 
 class Premise(Printable):
+    _immutable_fields_ = ['left', 'right']
+
     def __init__(self, left, right):
         self.left = left
         self.right = right
@@ -83,6 +91,8 @@ class Premise(Printable):
 
 
 class PatternMatchPremise(Premise):
+    _immutable_fields_ = ['left', 'right']
+
     def __init__(self, left, right):
         Premise.__init__(self, left, right)
 
@@ -91,6 +101,8 @@ class PatternMatchPremise(Premise):
 
 
 class EqualityCheckPremise(Premise):
+    _immutable_fields_ = ['left', 'right']
+
     def __init__(self, left, right):
         Premise.__init__(self, left, right)
 
@@ -99,6 +111,8 @@ class EqualityCheckPremise(Premise):
 
 
 class AssignmentPremise(Premise):
+    _immutable_fields_ = ['left', 'right']
+
     def __init__(self, left, right):
         Premise.__init__(self, left, right)
 
@@ -107,6 +121,8 @@ class AssignmentPremise(Premise):
 
 
 class ReductionPremise(Premise):
+    _immutable_fields_ = ['left', 'right']
+
     def __init__(self, left, right):
         Premise.__init__(self, left, right)
 
@@ -115,6 +131,8 @@ class ReductionPremise(Premise):
 
 
 class CasePremise(Premise):
+    _immutable_fields_ = ['left', 'values[*]', 'premises[*]']
+
     def __init__(self, left, values=None, premises=None):
         Premise.__init__(self, left, None)
         self.values = values if values else []

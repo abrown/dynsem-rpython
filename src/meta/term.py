@@ -24,6 +24,8 @@ class Term(Printable):
 
 
 class ApplTerm(Term):
+    _immutable_fields = ['name', 'args[*]']
+
     def __init__(self, name, args=None):
         Term.__init__(self)
         self.name = name
@@ -51,6 +53,8 @@ class ApplTerm(Term):
 
 
 class ListTerm(Term):
+    _immutable_fields = ['items[*]']
+
     def __init__(self, items=None):
         Term.__init__(self)
         self.items = items if items else []
@@ -77,7 +81,7 @@ class ListTerm(Term):
 
 
 class ListPatternTerm(Term):
-    """TODO move this to a patterns package?"""
+    _immutable_fields = ['vars[*]', 'rest']
 
     def __init__(self, vars=None, rest=None):
         Term.__init__(self)
@@ -98,6 +102,8 @@ class ListPatternTerm(Term):
 
 
 class IntTerm(Term):
+    _immutable_fields = ['number']
+
     def __init__(self, value):
         Term.__init__(self)
         self.number = value
@@ -113,6 +119,8 @@ class IntTerm(Term):
 
 
 class VarTerm(Term):
+    _immutable_fields = ['name']
+
     def __init__(self, name):
         Term.__init__(self)
         self.name = name
@@ -125,6 +133,8 @@ class VarTerm(Term):
 
 
 class EnvWriteTerm(Term):
+    _immutable_fields = ['assignments[*]']
+
     # TODO this probably shouldn't be a term
     def __init__(self, assignments=None):
         Term.__init__(self)
@@ -141,6 +151,8 @@ class EnvWriteTerm(Term):
 
 
 class EnvReadTerm(Term):
+    _immutable_fields = ['name', 'key']
+
     # TODO this probably shouldn't be a term
     def __init__(self, name, key):
         Term.__init__(self)
