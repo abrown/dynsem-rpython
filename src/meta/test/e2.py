@@ -3,7 +3,7 @@ import unittest
 from src.meta.e2 import e2
 from src.meta.interpreter import Interpreter
 from src.meta.parser import Parser
-from src.meta.term import ApplTerm, IntTerm
+from src.meta.term import ApplTerm, IntTerm, VarTerm
 
 
 class TestE2(unittest.TestCase):

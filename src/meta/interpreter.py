@@ -1,7 +1,7 @@
 from src.meta.context import Context
 from src.meta.dynsem import PatternMatchPremise, DynsemError, EqualityCheckPremise, AssignmentPremise, ReductionPremise, \
     CasePremise
-from src.meta.term import ApplTerm, EnvReadTerm, EnvWriteTerm, VarTerm, IntTerm
+from src.meta.term import ApplTerm, MapReadTerm, MapWriteTerm, VarTerm, IntTerm
 
 # So that you can still run this module under standard CPython, I add this
 # import guard that creates a dummy class instead.
@@ -132,17 +132,17 @@ class Interpreter:
                 self.transform_premise(premise, context)
 
         # handle environment changes
-        if isinstance(rule.after, EnvWriteTerm):
+        if isinstance(rule.after, MapWriteTerm):
             new_environment = {}
             # handle environment cloning first so assignments can overwrite
             for key in rule.after.assignments:
-                if isinstance(rule.after.assignments[key], EnvWriteTerm):
+                if isinstance(rule.after.assignments[key], MapWriteTerm):
                     new_environment.update(self.environment)
                     # TODO this is an unchecked assumption that {..., E, ...} refers to an E in the semantic components
             # overwrite with assignments
             for key in rule.after.assignments:
                 value = rule.after.assignments[key]
-                resolved_key = context.resolve(VarTerm(key))
+                resolved_key = context.resolve(key)
                 if not isinstance(resolved_key, VarTerm):
                     raise InterpreterError("Expected a VarTerm to use as the environment name but found: %s" %
                                            resolved_key)
@@ -150,8 +150,8 @@ class Interpreter:
                 new_environment[resolved_key.name] = interpreted_value
             # save the new environment TODO there could be multiple
             self.environment = new_environment
-        elif isinstance(rule.after, EnvReadTerm):
-            resolved_key = context.resolve(VarTerm(rule.after.key))
+        elif isinstance(rule.after, MapReadTerm):
+            resolved_key = context.resolve(rule.after.key)
             return self.environment[resolved_key.name]  # TODO this relies on the same unchecked assumption above
 
         result = context.resolve(rule.after)

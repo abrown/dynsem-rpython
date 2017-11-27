@@ -2,7 +2,7 @@ import unittest
 
 from src.meta.dynsem import EqualityCheckPremise, Rule, CasePremise
 from src.meta.parser import Parser
-from src.meta.term import ApplTerm, VarTerm, IntTerm, EnvReadTerm, EnvWriteTerm, ListTerm
+from src.meta.term import ApplTerm, VarTerm, IntTerm, MapReadTerm, MapWriteTerm, ListTerm
 
 
 class TestParser(unittest.TestCase):
@@ -39,14 +39,14 @@ class TestParser(unittest.TestCase):
 
         term = Parser.term(text)
 
-        self.assertEqual(ApplTerm("a", [VarTerm("x"), VarTerm("y")]), term)
+        self.assertEqual(ApplTerm("a", [VarTerm("x", 0), VarTerm("y", 1)]), term)
 
     def test_rules(self):
         text = """a(x, y) --> b where 1 == 1"""
 
         parsed = Parser.rule(text)
 
-        expected = Rule(ApplTerm("a", [VarTerm("x"), VarTerm("y")]), VarTerm("b"))
+        expected = Rule(ApplTerm("a", [VarTerm("x", 0), VarTerm("y", 1)]), VarTerm("b"))
         expected.premises.append(EqualityCheckPremise(IntTerm(1), IntTerm(1)))
 
         self.assertEqual(expected, parsed)
@@ -68,16 +68,16 @@ class TestParser(unittest.TestCase):
     def test_environment_write(self):
         rule = Parser.rule("E |- bindVar(x, v) --> {x |--> v, E}")
 
-        self.assertIsInstance(rule.after, EnvWriteTerm)
+        self.assertIsInstance(rule.after, MapWriteTerm)
         self.assertEqual(2, len(rule.after.assignments))
         self.assertEqual(VarTerm("E"), rule.components[0])
 
     def test_environment_read(self):
         rule = Parser.rule("E |- read(x) --> E[x]")
 
-        self.assertIsInstance(rule.after, EnvReadTerm)
-        self.assertEqual("E", rule.after.name)
-        self.assertEqual("x", rule.after.key)
+        self.assertIsInstance(rule.after, MapReadTerm)
+        self.assertEqual(VarTerm("E"), rule.after.map)
+        self.assertEqual(VarTerm("x", 0), rule.after.key)
 
     def test_case(self):
         premise = Parser.premise("case i of {1 => x --> y otherwise => y --> z}")
@@ -99,6 +99,7 @@ class TestParser(unittest.TestCase):
         self.assertIsInstance(term, ApplTerm)
         self.assertEqual(3, len(term.args))
         self.assertEqual("leq", term.args[0].name)
+
 
 if __name__ == '__main__':
     unittest.main()

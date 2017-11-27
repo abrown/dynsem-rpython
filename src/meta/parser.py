@@ -1,3 +1,4 @@
+from src.meta.context import SlotAssigner
 from src.meta.dynsem import *
 from src.meta.term import *
 from src.meta.tokenizer import *
@@ -20,12 +21,16 @@ class Parser:
     @staticmethod
     def term(text):
         """Helper method for parsing a single term"""
-        return Parser(text).__parse_term()
+        term = Parser(text).__parse_term()
+        SlotAssigner().assign_term(term)  # TODO should we really do this?
+        return term
 
     @staticmethod
     def rule(text):
         """Helper method for parsing a single rule"""
-        return Parser(text).__parse_rule()
+        rule = Parser(text).__parse_rule()
+        SlotAssigner().assign_rule(rule)
+        return rule
 
     @staticmethod
     def premise(text):
@@ -123,7 +128,7 @@ class Parser:
         if self.__possible(LeftBracketToken):
             name = self.__expect(IdToken)
             self.__expect(RightBracketToken)
-            return EnvReadTerm(id.value, name.value)
+            return MapReadTerm(VarTerm(id.value), VarTerm(name.value))
         else:
             return VarTerm(id.value)
 
@@ -136,11 +141,11 @@ class Parser:
             if self.__possible_value(OperatorToken, "|-->"):
                 value = self.__expect_term()
             else:
-                value = EnvWriteTerm()  # TODO this is by "convention" but not necessarily clear
-            assignments[name.name] = value
+                value = MapWriteTerm()  # TODO this is by "convention" but not necessarily clear
+            assignments[name] = value
             self.__possible(CommaToken)
         self.__expect(RightBraceToken)
-        return EnvWriteTerm(assignments)
+        return MapWriteTerm(assignments)
 
     def __parse_list(self, token):
         items = []

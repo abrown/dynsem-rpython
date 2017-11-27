@@ -111,6 +111,7 @@ class EqualityCheckPremise(Premise):
 
 
 class AssignmentPremise(Premise):
+    # TODO remove, same as pattern match
     _immutable_fields_ = ['left', 'right']
 
     def __init__(self, left, right):
@@ -139,4 +140,10 @@ class CasePremise(Premise):
         self.premises = premises if premises else []
 
     def to_string(self):
-        return "case %s of {...}" % self.left
+        subpremises = []
+        for i in range(len(self.values)):
+            left = self.values[i].to_string() if self.values[i] else "otherwise"
+            right = self.premises[i].to_string()
+            sp = "%s => %s" % (left, right)
+            subpremises.append(sp)
+        return "case %s of {%s}" % (self.left, "; ".join(subpremises))

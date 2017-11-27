@@ -1,20 +1,20 @@
 import unittest
 
-from src.meta.dynsem import Module, Rule, NativeFunction, DynsemError
+from src.meta.dynsem import Module, NativeFunction, DynsemError
 from src.meta.interpreter import Interpreter
 from src.meta.parser import Parser
-from src.meta.term import IntTerm, EnvWriteTerm, ApplTerm
+from src.meta.term import IntTerm, MapWriteTerm, ApplTerm, VarTerm
 
 
 class TestInterpreter(unittest.TestCase):
     def test_one_transformation(self):
         mod = Module()
-        mod.rules.append(Rule(Parser.term("a(x)"), Parser.term("b"), [Parser.premise("x == 1")]))
+        mod.rules.append(Parser.rule("a(x) --> b where x == 1"))
         term = Parser.term("a(1)")
 
         result = Interpreter(mod).interpret(term)
 
-        self.assertEqual(result, Parser.term("b"))
+        self.assertEqual(result, VarTerm("b"))
 
     def test_multiple_transformations(self):
         mod = Module()
@@ -53,7 +53,7 @@ class TestInterpreter(unittest.TestCase):
 
         result = sut.interpret(term)
 
-        self.assertIsInstance(result, EnvWriteTerm)
+        self.assertIsInstance(result, MapWriteTerm)
         self.assertEqual(IntTerm(1), sut.environment["a"])
 
     def test_environment_retrieval(self):
