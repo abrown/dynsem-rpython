@@ -3,8 +3,7 @@ from src.meta.dynsem import PatternMatchPremise, DynsemError, EqualityCheckPremi
     CasePremise
 from src.meta.term import ApplTerm, MapReadTerm, MapWriteTerm, VarTerm, IntTerm
 
-# So that you can still run this module under standard CPython, I add this
-# import guard that creates a dummy class instead.
+# So that you can still run this module under standard CPython...
 try:
     from rpython.rlib.jit import JitDriver, elidable, promote, unroll_safe
 except ImportError:
@@ -40,6 +39,8 @@ def jitpolicy(driver):
     except ImportError:
         raise NotImplemented("Abandon if we are unable to use RPython's JitPolicy")
 
+
+# end of RPython setup
 
 class InterpreterError(Exception):
     def __init__(self, reason):

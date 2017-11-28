@@ -1,6 +1,13 @@
 from src.meta.dynsem import PatternMatchPremise, EqualityCheckPremise, ReductionPremise, CasePremise, AssignmentPremise
 from src.meta.term import VarTerm, ListPatternTerm, ListTerm, ApplTerm, MapWriteTerm
 
+# So that you can still run this module under standard CPython...
+try:
+    from rpython.rlib.jit import unroll_safe
+except ImportError:
+    def unroll_safe(func):
+        return func
+
 
 class ContextError(Exception):
     def __init__(self, reason):
@@ -16,6 +23,7 @@ class Context:
             raise ValueError("Expected context to be instantiated with a size")
         self.map = [None] * size
 
+    @unroll_safe
     def bind(self, pattern, term):
         """Bind the names free variables in a pattern to values in a term and save them in a context; TODO make this
         non-static?"""
@@ -43,6 +51,7 @@ class Context:
             for i in range(len(term.args)):
                 self.bind(pattern.args[i], term.args[i])
 
+    @unroll_safe
     def resolve(self, term):
         """Using a context, resolve the names of free variables in a pattern to create a new term"""
         if isinstance(term, VarTerm) and term.slot >= 0:
@@ -54,6 +63,7 @@ class Context:
         else:
             return term
 
+    @unroll_safe
     def __resolve_appl(self, term):
         resolved_args = []
         for arg in term.args:
@@ -64,6 +74,7 @@ class Context:
                 resolved_args.append(resolved_arg)
         return ApplTerm(term.name, resolved_args)
 
+    @unroll_safe
     def __resolve_list(self, term):
         resolved_items = []
         for i in range(len(term.items)):
