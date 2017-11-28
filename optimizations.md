@@ -22,3 +22,22 @@ This is a record of the optimizations applied:
   1.88user 0.01system 0:02.07elapsed 91%CPU (0avgtext+0avgdata 43332maxresident)k
   0inputs+360outputs (0major+17536minor)pagefaults 0swaps
   ``` 
+
+- add `_immutable_fields_` to terms (unfortunately have to specify all the terms of the class hierarchy in each class)
+- use arrays in `Context` and some upfront analysis for determining slots to use. Maybe a ~30% time reduction:
+
+  ```
+  PYPYLOG=jit:e2-1511412269.log time bin/e2 src/main/sumprimes.e2
+  76127
+  4.38user 0.11system 0:04.49elapsed 99%CPU (0avgtext+0avgdata 123444maxresident)k
+  0inputs+1424outputs (0major+45923minor)pagefaults 0swaps
+  ```
+
+  ```
+  PYPYLOG=jit:e2-1511844456.log time bin/e2 src/main/sumprimes.e2
+  76127
+  3.40user 0.06system 0:03.46elapsed 99%CPU (0avgtext+0avgdata 120224maxresident)k
+  0inputs+1448outputs (0major+26645minor)pagefaults 0swaps
+  ```
+ 
+- add `@unroll_safe` to `Context` methods
