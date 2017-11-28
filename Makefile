@@ -19,8 +19,7 @@ endif
 all: test
 
 3rd:
-	git submodule init
-	git submodule update
+	git submodule update --init --recursive
 .PHONY: 3rd
 
 test:
