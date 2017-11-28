@@ -11,7 +11,9 @@ class Context:
     _immutable_fields_ = ['map']
 
     # TODO should this be the default size
-    def __init__(self, size=10):
+    def __init__(self, size):
+        if size is None:
+            raise ValueError("Expected context to be instantiated with a size")
         self.map = [None] * size
 
     def bind(self, pattern, term):

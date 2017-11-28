@@ -21,8 +21,9 @@ class Module:
 class Transformation(Printable):
     _immutable_fields_ = ['before']
 
-    def __init__(self, before):
+    def __init__(self, before, slots=0):
         self.before = before
+        self.slots = slots
 
     def matches(self, term):
         return self.before.matches(term)
@@ -41,8 +42,8 @@ class Transformation(Printable):
 class Rule(Transformation):
     _immutable_fields_ = ['before', 'after', 'components[*]', 'premises[*]']
 
-    def __init__(self, before, after, components=None, premises=None):
-        Transformation.__init__(self, before)
+    def __init__(self, before, after, components=None, premises=None, slots=0):
+        Transformation.__init__(self, before, slots)
         self.after = after
         self.components = components if components else []
         self.premises = premises if premises else []
@@ -61,8 +62,8 @@ class Rule(Transformation):
 class NativeFunction(Transformation):
     _immutable_fields_ = ['before', 'action']
 
-    def __init__(self, before, action):
-        Transformation.__init__(self, before)
+    def __init__(self, before, action, slots=2):
+        Transformation.__init__(self, before, slots)
         self.action = action
 
     def to_string(self):

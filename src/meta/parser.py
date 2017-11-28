@@ -29,7 +29,7 @@ class Parser:
     def rule(text):
         """Helper method for parsing a single rule"""
         rule = Parser(text).__parse_rule()
-        SlotAssigner().assign_rule(rule)
+        rule.slots = SlotAssigner().assign_rule(rule)
         return rule
 
     @staticmethod

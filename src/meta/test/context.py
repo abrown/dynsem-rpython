@@ -7,7 +7,7 @@ from src.meta.term import VarTerm, IntTerm, ListTerm
 
 class TestContext(unittest.TestCase):
     def setUp(self):
-        self.sut = Context()
+        self.sut = Context(10)
 
     def bind(self, term1, term2):
         self.term1 = Parser.term(term1)

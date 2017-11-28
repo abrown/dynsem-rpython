@@ -120,7 +120,7 @@ class Interpreter:
 
     @unroll_safe
     def transform_rule(self, term, rule):
-        context = Context()
+        context = Context(rule.slots)
         # for component in rule.components:
         # context.bind(component, self.environment)
         # TODO re-enable when we can bind the environment name to the context
@@ -198,7 +198,7 @@ class Interpreter:
 
     @unroll_safe
     def transform_native_function(self, term, native_function):
-        context = Context()
+        context = Context(native_function.slots)
         context.bind(native_function.before, term)
 
         args = []

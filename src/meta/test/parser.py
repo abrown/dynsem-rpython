@@ -48,6 +48,7 @@ class TestParser(unittest.TestCase):
 
         expected = Rule(ApplTerm("a", [VarTerm("x", 0), VarTerm("y", 1)]), VarTerm("b"))
         expected.premises.append(EqualityCheckPremise(IntTerm(1), IntTerm(1)))
+        expected.slots = 2
 
         self.assertEqual(expected, parsed)
 
