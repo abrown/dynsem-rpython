@@ -26,11 +26,11 @@ all: test
 test:
 	python -m unittest discover -s src/meta/test -p "*.py" -t .
 
-bin/e2: src/main/e2.py $(shell find src/meta/*.py)
+bin/e2: src/main/e2.py $(shell find src/meta/*.py) clean-pyc
 	mkdir -p bin
 	PYTHONPATH=. python ${RPYTHON} --log --opt=${JIT_OPT} --output=$@ $<
 
-bin/while: src/main/while.py $(shell find src/meta/*.py)
+bin/while: src/main/while.py $(shell find src/meta/*.py) clean-pyc
 	mkdir -p bin
 	PYTHONPATH=. python ${RPYTHON} --log --opt=${JIT_OPT} --output=$@ $<
 
@@ -53,7 +53,12 @@ docker: Dockerfile $(shell find src/meta/*.py)
 docker-run: docker
 	docker run -it --rm ${IMAGE}
 
-clean:
+clean: clean-pyc
 	rm -f *.log
 	rm -rf bin
 	docker rmi -f ${IMAGE}
+PHONY: clean
+
+clean-pyc:
+	rm -f $(shell find src/**/*.pyc)
+PHONY: clean-pyc
