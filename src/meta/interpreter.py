@@ -64,15 +64,15 @@ class Interpreter:
             if self.debug:
                 print("Term: %s" % term.to_string())
 
-            # TODO need to guard this some way (perhaps with a new node)
-            jitdriver.jit_merge_point(term=term)
-
             # attempt rule transform
             rule = self.find_rule(term)
             if rule:
                 if self.debug:
                     print("Rule: %s" % rule.to_string())
-                term = self.transform_rule(term, rule)
+                if rule.has_loop:
+                    term = self.transform_looping_rule(term, rule)
+                else:
+                    term = self.transform_rule(term, rule)
             else:
                 # attempt native transform
                 native = self.find_native_function(term)
@@ -119,6 +119,12 @@ class Interpreter:
                 return native
         return None
 
+    def transform_looping_rule(self, term, rule):
+        if self.debug:
+            print("Looping")
+        jitdriver.jit_merge_point(term=term)
+        return self.transform_rule(term, rule)
+    
     @unroll_safe
     def transform_rule(self, term, rule):
         context = Context(rule.slots)

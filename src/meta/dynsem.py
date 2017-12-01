@@ -42,11 +42,12 @@ class Transformation(Printable):
 class Rule(Transformation):
     _immutable_fields_ = ['before', 'after', 'components[*]', 'premises[*]']
 
-    def __init__(self, before, after, components=None, premises=None, slots=0):
+    def __init__(self, before, after, components=None, premises=None, slots=0, has_loop=False):
         Transformation.__init__(self, before, slots)
         self.after = after
         self.components = components if components else []
         self.premises = premises if premises else []
+        self.has_loop = has_loop
 
     def to_string(self):
         transform = "%s --> %s" % (self.before.to_string(), self.after.to_string())
