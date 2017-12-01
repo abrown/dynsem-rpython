@@ -1,6 +1,7 @@
 RPYTHON=3rd/pypy/rpython/bin/rpython
 VERSION=0.1
 IMAGE=dynsem:${VERSION}
+LOG=e2-$(shell date +%s).log
 
 # define FAST=1 to avoid the long-compiling JIT option
 ifeq (${FAST}, )
@@ -33,9 +34,11 @@ bin/while: src/main/while.py $(shell find src/meta/*.py)
 	mkdir -p bin
 	PYTHONPATH=. python ${RPYTHON} --log --opt=${JIT_OPT} --output=$@ $<
 
-E2_LOG=e2-$(shell date +%s).log
 run: bin/e2
-	PYPYLOG=jit:${E2_LOG} time $< src/main/sumprimes.e2
+	PYPYLOG=jit:${LOG} time $< src/main/sumprimes.e2
+
+run-pypy: src/main/sumprimes.py
+	PYPYLOG=jit:${LOG} time pypy $<
 
 show-last-log:
 	less $(shell ls e2-*.log | tail -n 1)
@@ -51,6 +54,6 @@ docker-run: docker
 	docker run -it --rm ${IMAGE}
 
 clean:
-	rm *.log
+	rm -f *.log
 	rm -rf bin
-	docker rmi ${IMAGE}
+	docker rmi -f ${IMAGE}
