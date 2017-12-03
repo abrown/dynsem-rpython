@@ -26,7 +26,7 @@ all: test
 test:
 	python -m unittest discover -s src/meta/test -p "*.py" -t .
 
-bin/e2: src/main/e2.py $(shell find src/meta/*.py) clean-pyc
+bin/e2: src/main/e2.py $(shell find src/meta/*.py)
 	mkdir -p bin
 	PYTHONPATH=. python ${RPYTHON} --log --opt=${JIT_OPT} --output=$@ $<
 
