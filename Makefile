@@ -34,11 +34,17 @@ bin/while: src/main/while.py $(shell find src/meta/*.py) clean-pyc
 	mkdir -p bin
 	PYTHONPATH=. python ${RPYTHON} --log --opt=${JIT_OPT} --output=$@ $<
 
+bin/sumprimes: src/main/sumprimes.c
+	gcc -O0 $< -o $@
+
 run: bin/e2
 	PYPYLOG=jit:${LOG} time $< src/main/sumprimes.e2
 
 run-pypy: src/main/sumprimes.py
 	PYPYLOG=jit:${LOG} time pypy $<
+
+run-c: bin/sumprimes
+	time bin/sumprimes
 
 show-last-log:
 	less $(shell ls e2-*.log | tail -n 1)
