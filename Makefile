@@ -60,6 +60,9 @@ docker-run: docker
 	docker run -it --rm ${IMAGE}
 
 sync:
+ifndef to
+	$(error 'to' is undefined, e.g. make sync to=user@host:~/path/to/code)
+endif
 	rsync -Cra --out-format='[%t]--%n' --exclude="3rd" --exclude=".idea" --exclude=".git" --exclude="bin" --exclude="*.pyc" . ${to}
 .PHONY: sync
 
