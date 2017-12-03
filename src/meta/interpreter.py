@@ -56,6 +56,7 @@ class Interpreter:
         self.debug = debug
         self.nesting = -1
 
+    @unroll_safe
     def interpret(self, term):
         if self.debug:
             self.nesting += 1
@@ -164,6 +165,7 @@ class Interpreter:
         result = context.resolve(rule.after)
         return result
 
+    @unroll_safe
     def transform_premise(self, premise, context):
         if isinstance(premise, PatternMatchPremise):
             if premise.right.matches(premise.left):
