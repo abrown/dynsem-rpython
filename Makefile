@@ -53,6 +53,10 @@ docker: Dockerfile $(shell find src/meta/*.py)
 docker-run: docker
 	docker run -it --rm ${IMAGE}
 
+sync:
+	rsync -Cra --out-format='[%t]--%n' --exclude="3rd" --exclude=".idea" --exclude=".git" --exclude="bin" --exclude="*.pyc" . ${to}
+.PHONY: sync
+
 clean: clean-pyc
 	rm -f *.log
 	rm -rf bin
