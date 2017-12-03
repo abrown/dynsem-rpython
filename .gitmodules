@@ -2,3 +2,4 @@
 	path = 3rd/pypy
 	url = https://github.com/mozillazg/pypy
 	shallow = true
+	ignore = dirty
