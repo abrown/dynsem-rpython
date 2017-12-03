@@ -41,3 +41,15 @@ This is a record of the optimizations applied:
   ```
  
 - add `@unroll_safe` to `Context` methods
+- add the ability to mark certain rules as recursive (i.e. `rule.has_loop = True`) and made RPython only trace these 
+rules; this reduced the times on the Travis CI server from 3.31s 
+(https://travis-ci.org/abrown/dynsem-rpython/jobs/309823773#L1740) to 2.32s 
+(https://travis-ci.org/abrown/dynsem-rpython/jobs/309830068#L1727) and improved the memory usage and number of page 
+faults
+- add `@unroll_safe` to `interpret` method; without this, RPython could not trace into recursive calls to interpret and 
+we could not see the actual operations in the trace (e.g. `while(block([add(1, 2)])))`)
+- cached found transformations on their applicable ApplTerm (i.e. `term.trans = self.find_transformation(term)`); this
+sped up execution of sumprimes from ~0.80s to ~0.65s on my machine 
+(https://travis-ci.org/abrown/dynsem-rpython/jobs/310736501#L1101 vs 
+https://travis-ci.org/abrown/dynsem-rpython/jobs/310745423#L1094 does not accurately show the difference--different 
+hardware?)
