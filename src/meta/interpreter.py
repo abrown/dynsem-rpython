@@ -1,6 +1,6 @@
 from src.meta.context import Context
 from src.meta.dynsem import PatternMatchPremise, DynsemError, EqualityCheckPremise, AssignmentPremise, ReductionPremise, \
-    CasePremise
+    CasePremise, Rule, NativeFunction
 from src.meta.term import ApplTerm, MapReadTerm, MapWriteTerm, VarTerm, IntTerm
 
 # So that you can still run this module under standard CPython...
@@ -65,26 +65,27 @@ class Interpreter:
             if self.debug:
                 print("Term: %s" % term.to_string())
 
-            # attempt rule transform
-            rule = self.find_rule(term)
-            if rule:
+            if not term.trans:
+                term.trans = self.find_transformation(term)
+
+            transformation = term.trans
+            if transformation is None:
                 if self.debug:
-                    print("Rule: %s" % rule.to_string())
-                if rule.has_loop:
-                    term = self.transform_looping_rule(term, rule)
+                    print("No transformation found, returning")
+                break  # unable to transform this appl, must be terminal
+            elif isinstance(transformation, Rule):
+                if self.debug:
+                    print("Rule: %s" % transformation.to_string())
+                if transformation.has_loop:
+                    term = self.transform_looping_rule(term, transformation)
                 else:
-                    term = self.transform_rule(term, rule)
+                    term = self.transform_rule(term, transformation)
+            elif isinstance(transformation, NativeFunction):
+                if self.debug:
+                    print("Native: %s" % transformation.to_string())
+                term = self.transform_native_function(term, transformation)
             else:
-                # attempt native transform
-                native = self.find_native_function(term)
-                if native:
-                    if self.debug:
-                        print("Native: %s" % native.to_string())
-                    term = self.transform_native_function(term, native)
-                else:
-                    if self.debug:
-                        print("No transformation found, returning")
-                    break  # unable to transform this appl, must be terminal
+                raise NotImplementedError()
 
         if self.debug:
             self.nesting -= 1
@@ -108,24 +109,22 @@ class Interpreter:
             args.append(self.interpret(arg))
         return ApplTerm(term.name, args)
 
-    def find_rule(self, term):
+    def find_transformation(self, term):
         for rule in self.module.rules:
             if rule.matches(term):
                 return rule
-        return None
-
-    def find_native_function(self, term):
         for native in self.module.native_functions:
             if native.matches(term):
                 return native
         return None
 
+    # not sure if I want to: @unroll_safe
     def transform_looping_rule(self, term, rule):
         if self.debug:
             print("Looping")
         jitdriver.jit_merge_point(term=term)
         return self.transform_rule(term, rule)
-    
+
     @unroll_safe
     def transform_rule(self, term, rule):
         context = Context(rule.slots)

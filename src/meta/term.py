@@ -38,10 +38,11 @@ class Term(Printable):
 class ApplTerm(Term):
     _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map', 'key']
 
-    def __init__(self, name, args=None):
+    def __init__(self, name, args=None, trans=None):
         Term.__init__(self)
         self.name = name
         self.args = list(args) if args else []
+        self.trans = trans  # caches a matched transformation for this term
 
     def walk(self, visitor, accumulator=None):
         return visitor(self, accumulator) or self.walk_list(self.args, visitor, accumulator)
