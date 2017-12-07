@@ -1,5 +1,11 @@
 from src.meta.printable import Printable
 
+try:
+    from rpython.rlib.jit import hint
+except ImportError:
+    def hint(x, **kwds):
+        return x
+
 
 class DynsemError(Exception):
     def __init__(self, reason):
@@ -8,6 +14,7 @@ class DynsemError(Exception):
 
 class Module:
     def __init__(self):
+        self = hint(self, access_directly=True, fresh_virtualizable=True)
         self.name = ""
         self.imports = []
         self.sorts = []
