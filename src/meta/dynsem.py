@@ -12,9 +12,8 @@ class DynsemError(Exception):
         self.reason = reason
 
 
-class Module:
+class ModuleBuilder:
     def __init__(self):
-        self = hint(self, access_directly=True, fresh_virtualizable=True)
         self.name = ""
         self.imports = []
         self.sorts = []
@@ -23,6 +22,14 @@ class Module:
         self.components = []
         self.native_functions = []
         self.rules = []
+
+
+class Module:
+    _immutable_fields_ = ['rules[*]', 'native_functions[*]']
+
+    def __init__(self, rules=None, native_functions=None):
+        self.rules = rules if rules else []
+        self.native_functions = native_functions if native_functions else []
 
 
 class Transformation(Printable):
