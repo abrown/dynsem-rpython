@@ -91,24 +91,6 @@ class Interpreter:
             self.nesting -= 1
         return term
 
-    def to_tuple(self, list):
-        list = list if list else []
-        length = len(list)
-        if length == 0:
-            return ()
-        elif length == 1:
-            return (list[0])
-        elif length == 2:
-            return (list[0], list[1])
-        else:
-            raise NotImplementedError
-
-    def interpret_subterms(self, term):
-        args = []
-        for arg in term.args:
-            args.append(self.interpret(arg))
-        return ApplTerm(term.name, args)
-
     def find_transformation(self, term):
         for rule in self.module.rules:
             if rule.matches(term):
