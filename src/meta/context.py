@@ -1,10 +1,14 @@
 from src.meta.dynsem import PatternMatchPremise, EqualityCheckPremise, ReductionPremise, CasePremise, AssignmentPremise
-from src.meta.term import VarTerm, ListPatternTerm, ListTerm, ApplTerm, MapWriteTerm
+from src.meta.term import VarTerm, ListPatternTerm, ListTerm, ApplTerm
 
 # So that you can still run this module under standard CPython...
 try:
-    from rpython.rlib.jit import unroll_safe
+    from rpython.rlib.jit import unroll_safe, hint
 except ImportError:
+    def hint(x, **kwds):
+        return x
+
+
     def unroll_safe(func):
         return func
 
@@ -19,6 +23,7 @@ class Context:
 
     # TODO should this be the default size
     def __init__(self, size):
+        self = hint(self, access_directly=True, fresh_virtualizable=True)
         if size is None:
             raise ValueError("Expected context to be instantiated with a size")
         self.map = [None] * size
@@ -99,7 +104,7 @@ class SlotAssigner:
         for premise in rule.premises:
             self.assign_premise(premise)
         self.__resolved(rule.after)
-        
+
         return self.slot - slot_before
 
     def assign_premise(self, premise):
@@ -110,7 +115,7 @@ class SlotAssigner:
         if isinstance(premise, PatternMatchPremise):
             self.__bound(premise.left)
             self.__resolved(premise.right)
-        if isinstance(premise, AssignmentPremise): # TODO remove
+        if isinstance(premise, AssignmentPremise):  # TODO remove
             self.__bound(premise.left)
             self.__resolved(premise.right)
         elif isinstance(premise, EqualityCheckPremise):

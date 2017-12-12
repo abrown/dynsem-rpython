@@ -12,6 +12,8 @@ except ImportError:
 
         def jit_merge_point(self, **kw): pass
 
+        def can_enter_jit(self, **kw): pass
+
 
     def elidable(func):
         return func
@@ -25,11 +27,12 @@ except ImportError:
         return func
 
 
-def get_location(term):
+def get_location(term, rule):
     return "%s" % (term.to_string())
 
 
-jitdriver = JitDriver(greens=['term'], reds='auto', get_printable_location=get_location)
+#jitdriver = JitDriver(greens=['term', 'rule'], reds='auto', get_printable_location=get_location)
+jitdriver = JitDriver(greens=['term', 'rule'], reds=['interpreter'], get_printable_location=get_location)
 
 
 def jitpolicy(driver):
@@ -104,7 +107,10 @@ class Interpreter:
     def transform_looping_rule(self, term, rule):
         if self.debug:
             print("Looping")
-        jitdriver.jit_merge_point(term=term)
+        jitdriver.can_enter_jit(term=term, rule=rule, interpreter=self)
+        jitdriver.jit_merge_point(term=term, rule=rule, interpreter=self)
+        term = promote(term)
+        rule = promote(rule)
         return self.transform_rule(term, rule)
 
     @unroll_safe

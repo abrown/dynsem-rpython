@@ -47,7 +47,7 @@ run-c: bin/sumprimes
 	time bin/sumprimes
 
 show-last-log:
-	less $(shell ls e2-*.log | tail -n 1)
+	less -N $(shell ls e2-*.log | tail -n 1)
 
 disassemble: e2.log
 	PYTHONPATH=3rd/pypy 3rd/pypy/rpython/jit/backend/tool/viewcode.py $<
