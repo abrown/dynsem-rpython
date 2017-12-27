@@ -49,19 +49,19 @@ class TestInterpreter(unittest.TestCase):
         mod.rules.append(Parser.rule("E |- bindVar(k, v) --> {k |--> v, E}"))
         term = Parser.term("bindVar(a, 1)")
         sut = Interpreter(mod)
-        sut.environment = {'a': IntTerm(42)}  # this should be overwritten
+        a = sut.environment.locate_and_put("a", IntTerm(42))  # this should be overwritten
 
         result = sut.interpret(term)
 
         self.assertIsInstance(result, MapWriteTerm)
-        self.assertEqual(IntTerm(1), sut.environment["a"])
+        self.assertEqual(IntTerm(1), sut.environment.get(a))
 
     def test_environment_retrieval(self):
         mod = Module()
         mod.rules.append(Parser.rule("E |- read(y) --> E[y]"))
         term = Parser.term("read(y)")
         sut = Interpreter(mod)
-        sut.environment["y"] = 42
+        sut.environment.locate_and_put("y", 42)
 
         result = sut.interpret(term)
 

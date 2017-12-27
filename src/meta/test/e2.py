@@ -3,7 +3,7 @@ import unittest
 from src.meta.e2 import e2
 from src.meta.interpreter import Interpreter
 from src.meta.parser import Parser
-from src.meta.term import ApplTerm, IntTerm, VarTerm
+from src.meta.term import ApplTerm, IntTerm
 
 
 class TestE2(unittest.TestCase):
@@ -35,7 +35,7 @@ class TestE2(unittest.TestCase):
         term = Parser.term(program)
         result = interpreter.interpret(term)
 
-        self.assertEqual(interpreter.environment['a'], IntTerm(11))
+        self.assertEqual(interpreter.environment.locate_and_get("a"), IntTerm(11))
         self.assertEqual(result, ApplTerm("block"))
         self.assertEqual(len(result.args), 0)
 
@@ -51,7 +51,7 @@ class TestE2(unittest.TestCase):
 
         interpreter.interpret(term)
 
-        self.assertEqual(interpreter.environment['a'], IntTerm(2))
+        self.assertEqual(interpreter.environment.locate_and_get("a"), IntTerm(2))
 
     def test_sumprimes(self):
         program = """
@@ -93,7 +93,7 @@ class TestE2(unittest.TestCase):
         interpreter.interpret(term)
 
         # 328 seems about right: http://www.wolframalpha.com/input/?i=sum+primes+up+to+50&x=0&y=0
-        self.assertEqual(interpreter.environment["s"], IntTerm(328))
+        self.assertEqual(interpreter.environment.locate_and_get("s"), IntTerm(328))
 
 
 if __name__ == '__main__':

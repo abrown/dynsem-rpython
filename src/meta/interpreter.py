@@ -1,6 +1,7 @@
 from src.meta.context import Context
 from src.meta.dynsem import PatternMatchPremise, DynsemError, EqualityCheckPremise, AssignmentPremise, ReductionPremise, \
     CasePremise, Rule, NativeFunction
+from src.meta.list_backed_map import ListBackedMap
 from src.meta.term import ApplTerm, MapReadTerm, MapWriteTerm, VarTerm, IntTerm
 
 # So that you can still run this module under standard CPython...
@@ -31,7 +32,7 @@ def get_location(term, rule):
     return "%s" % (term.to_string())
 
 
-#jitdriver = JitDriver(greens=['term', 'rule'], reds='auto', get_printable_location=get_location)
+# jitdriver = JitDriver(greens=['term', 'rule'], reds='auto', get_printable_location=get_location)
 jitdriver = JitDriver(greens=['term', 'rule'], reds=['interpreter'], get_printable_location=get_location)
 
 
@@ -54,7 +55,7 @@ class Interpreter:
     _immutable_fields_ = ['module', 'debug']
 
     def __init__(self, dynsem_module, debug=0):
-        self.environment = {}
+        self.environment = ListBackedMap()
         self.module = dynsem_module
         self.debug = debug
         self.nesting = -1
@@ -128,26 +129,25 @@ class Interpreter:
 
         # handle environment changes
         if isinstance(rule.after, MapWriteTerm):
-            new_environment = {}
-            # handle environment cloning first so assignments can overwrite
-            for key in rule.after.assignments:
-                if isinstance(rule.after.assignments[key], MapWriteTerm):
-                    new_environment.update(self.environment)
-                    # TODO this is an unchecked assumption that {..., E, ...} refers to an E in the semantic components
-            # overwrite with assignments
+            # TODO we incorrectly assume here that there is only one semantic component, a map:
             for key in rule.after.assignments:
                 value = rule.after.assignments[key]
+                if isinstance(value, MapWriteTerm):
+                    continue
                 resolved_key = context.resolve(key)
                 if not isinstance(resolved_key, VarTerm):
                     raise InterpreterError("Expected a VarTerm to use as the environment name but found: %s" %
                                            resolved_key)
+                # TODO cache this
+                key_index = self.environment.locate(resolved_key.name)
                 interpreted_value = self.interpret(context.resolve(value))
-                new_environment[resolved_key.name] = interpreted_value
-            # save the new environment TODO there could be multiple
-            self.environment = new_environment
+                self.environment.put(key_index, interpreted_value)
         elif isinstance(rule.after, MapReadTerm):
+            # TODO this relies on the same unchecked assumption as above
             resolved_key = context.resolve(rule.after.key)
-            return self.environment[resolved_key.name]  # TODO this relies on the same unchecked assumption above
+            # TODO cache this
+            key_index = self.environment.locate(resolved_key.name)
+            return self.environment.get(key_index)
 
         result = context.resolve(rule.after)
         return result
