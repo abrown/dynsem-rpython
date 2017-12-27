@@ -27,6 +27,7 @@ class Context:
         if size is None:
             raise ValueError("Expected context to be instantiated with a size")
         self.map = [None] * size
+        # TODO generate this array on rules and make it static, no need to create each time
 
     @unroll_safe
     def bind(self, pattern, term):

@@ -129,7 +129,7 @@ class Interpreter:
 
         # handle environment changes
         if isinstance(rule.after, MapWriteTerm):
-            # TODO we incorrectly assume here that there is only one semantic component, a map:
+            # TODO we incorrectly assume here that there is only one semantic component, an environment map:
             for key in rule.after.assignments:
                 value = rule.after.assignments[key]
                 if isinstance(value, MapWriteTerm):
@@ -138,16 +138,16 @@ class Interpreter:
                 if not isinstance(resolved_key, VarTerm):
                     raise InterpreterError("Expected a VarTerm to use as the environment name but found: %s" %
                                            resolved_key)
-                # TODO cache this
-                key_index = self.environment.locate(resolved_key.name)
                 interpreted_value = self.interpret(context.resolve(value))
-                self.environment.put(key_index, interpreted_value)
+                if resolved_key.index < 0:
+                    resolved_key.index = self.environment.locate(resolved_key.name)
+                self.environment.put(resolved_key.index, interpreted_value)
         elif isinstance(rule.after, MapReadTerm):
             # TODO this relies on the same unchecked assumption as above
             resolved_key = context.resolve(rule.after.key)
-            # TODO cache this
-            key_index = self.environment.locate(resolved_key.name)
-            return self.environment.get(key_index)
+            if resolved_key.index < 0:
+                resolved_key.index = self.environment.locate(resolved_key.name)
+            return self.environment.get(resolved_key.index)
 
         result = context.resolve(rule.after)
         return result

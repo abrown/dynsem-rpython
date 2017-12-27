@@ -147,10 +147,11 @@ class IntTerm(Term):
 class VarTerm(Term):
     _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map', 'key']
 
-    def __init__(self, name, slot=-1):
+    def __init__(self, name, slot=-1, index=-1):
         Term.__init__(self)
         self.name = name
         self.slot = slot
+        self.index = index
 
     def equals(self, term):
         return isinstance(term, self.__class__) and self.name == term.name
