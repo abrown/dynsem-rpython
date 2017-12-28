@@ -89,12 +89,25 @@ class TestInterpreter(unittest.TestCase):
     def test_native(self):
         mod = Module()
         mod.rules.append(Parser.rule("a(x) --> add(x, 1)"))
-        mod.native_functions.append(NativeFunction(Parser.term("add(x, y)"), lambda x, y: x + y))
+        mod.native_functions.append(NativeFunction(Parser.native_function("add(x, y)"), lambda x, y: x + y))
         term = Parser.term("a(1)")
 
         result = Interpreter(mod).interpret(term)
 
         self.assertEqual(result, IntTerm(2))
+
+    def test_interpreter_caching(self):
+        if_rule = Parser.rule("if(a) --> then(a)")
+        then1_rule = Parser.rule("then(0) --> b")
+        then2_rule = Parser.rule("then(x) --> c")
+        module = Module([if_rule, then1_rule, then2_rule])
+        interpreter = Interpreter(module)
+
+        result1 = interpreter.interpret(Parser.term("if(0)"))
+        self.assertEquals(VarTerm("b"), result1)
+
+        result2 = interpreter.interpret(Parser.term("if(1)"))
+        self.assertEquals(VarTerm("c"), result2)
 
 
 if __name__ == '__main__':

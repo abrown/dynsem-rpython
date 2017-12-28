@@ -7,11 +7,12 @@ from src.meta.term import VarTerm, IntTerm, ListTerm
 
 class TestContext(unittest.TestCase):
     def setUp(self):
-        self.sut = Context(10)
+        self.sut = Context([None] * 10)
 
     def bind(self, term1, term2):
         self.term1 = Parser.term(term1)
-        SlotAssigner().assign_term(self.term1)  # need to do this here because slot assignments are made at the rule level
+        SlotAssigner().assign_term(
+            self.term1)  # need to do this here because slot assignments are made at the rule level
         self.term2 = Parser.term(term2)
         self.sut.bind(self.term1, self.term2)
 
@@ -79,7 +80,7 @@ class TestContext(unittest.TestCase):
     def test_slots_on_rules(self):
         rule = Parser.rule("a(x) --> [z] where x == 1; b(y) => x; y --> z.")
 
-        assigned = SlotAssigner().assign_rule(rule)
+        assigned = SlotAssigner().assign_rule(rule.before, rule.after, rule.premises)
 
         self.assertEqual(3, assigned)
         self.assertEqual(0, rule.before.args[0].slot)
