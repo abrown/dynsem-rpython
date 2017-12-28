@@ -88,7 +88,7 @@ class TestE2(unittest.TestCase):
         """
 
         term = Parser.term(program)
-        interpreter = Interpreter(e2, 1)
+        interpreter = Interpreter(e2)
 
         # TODO fix that E somehow gets saved on the environment
         result = interpreter.interpret(term)
