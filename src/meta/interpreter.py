@@ -118,16 +118,16 @@ class Interpreter:
 
     @unroll_safe
     def transform_rule(self, term, rule):
-        context = Context()
+        context = Context(rule.bound_terms)
         # for component in rule.components:
         # context.bind(component, self.environment)
         # TODO re-enable when we can bind the environment name to the context
-        context.bind(rule.before, term, rule.bound_terms)
+        context.bind(rule.before, term)
 
         # handle premises
         if rule.premises:
             for premise in rule.premises:
-                self.transform_premise(premise, context, rule.bound_terms)
+                self.transform_premise(premise, context)
 
         # handle environment changes
         if isinstance(rule.after, MapWriteTerm):
@@ -136,49 +136,49 @@ class Interpreter:
                 value = rule.after.assignments[key]
                 if isinstance(value, MapWriteTerm):
                     continue
-                resolved_key = context.resolve(key, rule.bound_terms)
+                resolved_key = context.resolve(key)
                 if not isinstance(resolved_key, VarTerm):
                     raise InterpreterError("Expected a VarTerm to use as the environment name but found: %s" %
                                            resolved_key)
-                interpreted_value = self.interpret(context.resolve(value, rule.bound_terms))
+                interpreted_value = self.interpret(context.resolve(value))
                 if resolved_key.index < 0:
                     resolved_key.index = self.environment.locate(resolved_key.name)
                 self.environment.put(resolved_key.index, interpreted_value)
         elif isinstance(rule.after, MapReadTerm):
             # TODO this relies on the same unchecked assumption as above
-            resolved_key = context.resolve(rule.after.key, rule.bound_terms)
+            resolved_key = context.resolve(rule.after.key)
             if resolved_key.index < 0:
                 resolved_key.index = self.environment.locate(resolved_key.name)
             return self.environment.get(resolved_key.index)
 
-        result = context.resolve(rule.after, rule.bound_terms)
+        result = context.resolve(rule.after)
         return result
 
     @unroll_safe
-    def transform_premise(self, premise, context, bound_terms):
+    def transform_premise(self, premise, context):
         if isinstance(premise, PatternMatchPremise):
             if premise.right.matches(premise.left):
-                context.bind(premise.left, premise.right, bound_terms)  # TODO seems like it should be context.resolve(premise.right)
+                context.bind(premise.left, premise.right)  # TODO seems like it should be context.resolve(premise.right)
             else:
                 raise DynsemError("Expected %s to match %s" % (premise.left, premise.right))
         elif isinstance(premise, EqualityCheckPremise):
             # TODO interpret each side here
-            left_term = context.resolve(premise.left, bound_terms)
-            right_term = context.resolve(premise.right, bound_terms)
+            left_term = context.resolve(premise.left)
+            right_term = context.resolve(premise.right)
             if not left_term.equals(right_term):
                 raise DynsemError("Expected %s to equal %s" % (premise.left, premise.right))
         elif isinstance(premise, AssignmentPremise):
             if isinstance(premise.left, VarTerm):
-                context.bind(premise.left, context.resolve(premise.right, bound_terms), bound_terms)
+                context.bind(premise.left, context.resolve(premise.right))
             else:
                 raise DynsemError("Cannot assign to anything other than a variable (e.g. x => 2); TODO add " +
                                   "support for constructor assignment (e.g. a(1, 2) => a(x, y))")
         elif isinstance(premise, ReductionPremise):
-            intermediate_term = context.resolve(premise.left, bound_terms)
+            intermediate_term = context.resolve(premise.left)
             new_term = self.interpret(intermediate_term)
-            context.bind(premise.right, new_term, bound_terms)
+            context.bind(premise.right, new_term)
         elif isinstance(premise, CasePremise):
-            value = context.resolve(premise.left, bound_terms)
+            value = context.resolve(premise.left)
             found = None
             for i in range(len(premise.values)):
                 if premise.values[i] is None:  # otherwise branch
@@ -188,7 +188,7 @@ class Interpreter:
                     found = premise.premises[i]
                     break
             if found:
-                self.transform_premise(found, context, bound_terms)
+                self.transform_premise(found, context)
             else:
                 raise DynsemError("Unable to find matching branch in case statement: %s" % str(self))
         else:
@@ -196,12 +196,12 @@ class Interpreter:
 
     @unroll_safe
     def transform_native_function(self, term, native_function):
-        context = Context()
-        context.bind(native_function.before, term, native_function.bound_terms)
+        context = Context(native_function.bound_terms)
+        context.bind(native_function.before, term)
 
         args = []
         for arg in native_function.before.args:
-            resolved = context.resolve(arg, native_function.bound_terms)
+            resolved = context.resolve(arg)
             interpreted = self.interpret(
                 resolved)  # TODO need to determine what type of term to use, not hard-code this
             if not isinstance(interpreted, IntTerm):
