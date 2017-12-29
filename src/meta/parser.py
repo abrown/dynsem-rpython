@@ -1,5 +1,5 @@
-from src.meta.context import SlotAssigner
 from src.meta.dynsem import *
+from src.meta.slot_assigner import SlotAssigner
 from src.meta.term import *
 from src.meta.tokenizer import *
 
@@ -28,7 +28,9 @@ class Parser:
     def native_function(text):
         """Helper method for parsing a single term; has slot assignment for native contexts"""
         term = Parser(text).__parse_term()
-        SlotAssigner().assign_term(term)
+        assigned = SlotAssigner().assign_term(term)
+        if assigned != 2:
+            print("Expected native function to have two terms assigned: " + term.to_string())
         return term
 
     @staticmethod

@@ -1,5 +1,4 @@
-from src.meta.dynsem import PatternMatchPremise, EqualityCheckPremise, ReductionPremise, CasePremise, AssignmentPremise
-from src.meta.term import Term, VarTerm, ListPatternTerm, ListTerm, ApplTerm
+from src.meta.term import VarTerm, ListPatternTerm, ListTerm, ApplTerm
 
 # So that you can still run this module under standard CPython...
 try:
@@ -22,14 +21,12 @@ class Context:
     _immutable_ = True
 
     def __init__(self, bound_terms):
-        self.bound_terms = bound_terms[:]
+        self.bound_terms = bound_terms
 
     @unroll_safe
     def bind(self, pattern, term):
-        """Bind the names free variables in a pattern to values in a term and save them in a context; TODO make this
-        non-static?"""
+        """Bind the names free variables in a pattern to values in a term and save them in a context"""
         if isinstance(pattern, VarTerm):
-            #print("Binding %s to %s in %s" % (term, pattern, self.bt))
             self.bound_terms[pattern.slot] = term
         elif isinstance(pattern, ListTerm):
             if not isinstance(term, ListTerm):
@@ -55,10 +52,12 @@ class Context:
 
     @unroll_safe
     def resolve(self, term):
-        #print("Resolving %s from: %s" % (term, self.bt))
         """Using a context, resolve the names of free variables in a pattern to create a new term"""
         if isinstance(term, VarTerm) and term.slot >= 0:
-            return self.bound_terms[term.slot]
+            resolved = self.bound_terms[term.slot]
+            if resolved is None:
+                raise ContextError("This should never be none: %s" % term.to_string())
+            return resolved
         elif isinstance(term, ApplTerm):
             return self.__resolve_appl(term)
         elif isinstance(term, ListTerm):
@@ -86,82 +85,3 @@ class Context:
 
     def __str__(self):
         return str(self.bound_terms)
-
-
-# TODO move to separate file
-class SlotAssigner:
-    def __init__(self):
-        self.mapping = {}
-        self.slot = 0
-
-    def assign_rule(self, before, after, premises):
-        if not isinstance(before, Term) or not isinstance(after, Term) or not isinstance(premises, list):
-            raise ValueError("Expected before and after terms and a list of premises but was passed: %s, %s, %s" % (before, after, premises))
-
-        slot_before = self.slot
-        self.__bound(before)
-        for premise in premises:
-            self.assign_premise(premise)
-        self.__resolved(after)
-
-        return self.slot - slot_before
-
-    def assign_premise(self, premise):
-        if premise is None:
-            raise ValueError("Expected a premise, not none")
-
-        slot_before = self.slot
-        if isinstance(premise, PatternMatchPremise):
-            self.__bound(premise.left)
-            self.__resolved(premise.right)
-        if isinstance(premise, AssignmentPremise):  # TODO remove
-            self.__bound(premise.left)
-            self.__resolved(premise.right)
-        elif isinstance(premise, EqualityCheckPremise):
-            self.__resolved(premise.left)
-            self.__resolved(premise.right)
-        elif isinstance(premise, ReductionPremise):
-            self.__resolved(premise.left)
-            self.__bound(premise.right)
-        elif isinstance(premise, CasePremise):
-            self.__resolved(premise.left)
-            for subpremise in premise.premises:
-                self.assign_premise(subpremise)
-        else:
-            raise NotImplementedError("Unknown premise type: " + premise.__class__.__name__)
-
-        return self.slot - slot_before
-
-    def __bound(self, term):
-        if term is None:
-            raise ValueError("Expected a term, not none")
-
-        def set_as_bound(term, assigner):
-            if isinstance(term, VarTerm):
-                if term.name in assigner.mapping:
-                    term.slot = assigner.mapping[term.name]
-                else:
-                    assigner.mapping[term.name] = assigner.slot
-                    term.slot = assigner.slot
-                    assigner.slot += 1
-
-        term.walk(set_as_bound, self)
-
-    def __resolved(self, term):
-        if term is None:
-            raise ValueError("Expected a term, not none")
-
-        def set_as_resolved(term, assigner):
-            if isinstance(term, VarTerm):
-                if term.name in assigner.mapping:
-                    term.slot = assigner.mapping[term.name]
-                else:
-                    pass
-                    # TODO print warning re: unresolvable var term
-
-        term.walk(set_as_resolved, self)
-
-    def assign_term(self, term):
-        before_slot = self.slot
-        self.__bound(term)
-        return self.slot - before_slot

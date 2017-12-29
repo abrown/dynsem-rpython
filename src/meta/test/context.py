@@ -1,7 +1,8 @@
 import unittest
 
-from src.meta.context import Context, ContextError, SlotAssigner
+from src.meta.context import Context, ContextError
 from src.meta.parser import Parser
+from src.meta.slot_assigner import SlotAssigner
 from src.meta.term import VarTerm, IntTerm, ListTerm
 
 
@@ -67,29 +68,6 @@ class TestContext(unittest.TestCase):
     @unittest.skip("this check is done at a different level, e.g. in the rule-finding")
     def test_error_does_not_match(self):
         self.assertRaises(ContextError, self.bind, 'a(b, c)', 'b(1, 2)')
-
-    def test_slots_on_terms(self):
-        term = Parser.term("a(b, c)")
-
-        assigned = SlotAssigner().assign_term(term)
-
-        self.assertEqual(2, assigned)
-        self.assertEqual(0, term.args[0].slot)
-        self.assertEqual(1, term.args[1].slot)
-
-    def test_slots_on_rules(self):
-        rule = Parser.rule("a(x) --> [z] where x == 1; b(y) => x; y --> z.")
-
-        assigned = SlotAssigner().assign_rule(rule.before, rule.after, rule.premises)
-
-        self.assertEqual(3, assigned)
-        self.assertEqual(0, rule.before.args[0].slot)
-        self.assertEqual(0, rule.premises[0].left.slot)
-        self.assertEqual(1, rule.premises[1].left.args[0].slot)
-        self.assertEqual(0, rule.premises[1].right.slot)
-        self.assertEqual(1, rule.premises[2].left.slot)
-        self.assertEqual(2, rule.premises[2].right.slot)
-        self.assertEqual(2, rule.after.items[0].slot)
 
 
 if __name__ == '__main__':

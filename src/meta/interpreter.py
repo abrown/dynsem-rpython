@@ -123,6 +123,7 @@ class Interpreter:
         # context.bind(component, self.environment)
         # TODO re-enable when we can bind the environment name to the context
         context.bind(rule.before, term)
+        print("%sContext: %s" % (" " * self.nesting, context))
 
         # handle premises
         if rule.premises:
@@ -150,8 +151,10 @@ class Interpreter:
             if resolved_key.index < 0:
                 resolved_key.index = self.environment.locate(resolved_key.name)
             return self.environment.get(resolved_key.index)
+        # TODO perhaps the Map*Terms should return not themselves but the saved/retrieved value
 
         result = context.resolve(rule.after)
+        print("%sResult: %s" % (" " * self.nesting, result))
         return result
 
     @unroll_safe
@@ -214,4 +217,5 @@ class Interpreter:
         tuple_args = (args[0], args[1])  # TODO RPython demands this
 
         result = native_function.action(*tuple_args)
+        print("%sResult: %s" % (" " * self.nesting, result))
         return IntTerm(result)  # TODO need to determine what type of term to use, not hard-code this
