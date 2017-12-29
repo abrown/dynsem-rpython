@@ -21,14 +21,15 @@ class ContextError(Exception):
 class Context:
     _immutable_ = True
 
-    def __init__(self, number_of_terms):
-        self.bound_terms = [None] * number_of_terms
+    def __init__(self, bound_terms):
+        self.bound_terms = bound_terms[:]
 
     @unroll_safe
     def bind(self, pattern, term):
         """Bind the names free variables in a pattern to values in a term and save them in a context; TODO make this
         non-static?"""
         if isinstance(pattern, VarTerm):
+            #print("Binding %s to %s in %s" % (term, pattern, self.bt))
             self.bound_terms[pattern.slot] = term
         elif isinstance(pattern, ListTerm):
             if not isinstance(term, ListTerm):
@@ -54,6 +55,7 @@ class Context:
 
     @unroll_safe
     def resolve(self, term):
+        #print("Resolving %s from: %s" % (term, self.bt))
         """Using a context, resolve the names of free variables in a pattern to create a new term"""
         if isinstance(term, VarTerm) and term.slot >= 0:
             return self.bound_terms[term.slot]

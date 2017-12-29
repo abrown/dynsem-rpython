@@ -118,7 +118,7 @@ class Interpreter:
 
     @unroll_safe
     def transform_rule(self, term, rule):
-        context = Context(len(rule.bound_terms))
+        context = Context(rule.bound_terms)
         # for component in rule.components:
         # context.bind(component, self.environment)
         # TODO re-enable when we can bind the environment name to the context
@@ -158,7 +158,7 @@ class Interpreter:
     def transform_premise(self, premise, context):
         if isinstance(premise, PatternMatchPremise):
             if premise.right.matches(premise.left):
-                context.bind(premise.left, premise.right)
+                context.bind(premise.left, premise.right)  # TODO seems like it should be context.resolve(premise.right)
             else:
                 raise DynsemError("Expected %s to match %s" % (premise.left, premise.right))
         elif isinstance(premise, EqualityCheckPremise):
@@ -196,7 +196,7 @@ class Interpreter:
 
     @unroll_safe
     def transform_native_function(self, term, native_function):
-        context = Context(len(native_function.bound_terms))
+        context = Context(native_function.bound_terms)
         context.bind(native_function.before, term)
 
         args = []
