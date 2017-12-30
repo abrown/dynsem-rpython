@@ -27,7 +27,8 @@ class TestE2(unittest.TestCase):
         program = """
         block([
           assign(a, 0),
-          while(leq(retrieve(a), 10), 
+          assign(max, 10),
+          while(leq(retrieve(a), retrieve(max)), 
             block([assign(a, add(retrieve(a), 1)), write(retrieve(a))])
           )
         ])

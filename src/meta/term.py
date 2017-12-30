@@ -2,7 +2,8 @@ from src.meta.printable import Printable
 
 
 class Term(Printable):
-    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map', 'key']
+    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
+                         'key']
 
     def __init__(self):
         pass
@@ -36,13 +37,15 @@ class Term(Printable):
 
 # TODO refactor this into ListTerm
 class ApplTerm(Term):
-    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map', 'key']
+    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
+                         'key']
 
     def __init__(self, name, args=None, trans=None):
         Term.__init__(self)
         self.name = name
         self.args = list(args) if args else []
         self.trans = trans  # caches a matched transformation for this term
+        self.bound_terms = None  # caches the built context for the transformation matching this term
 
     def walk(self, visitor, accumulator=None):
         return visitor(self, accumulator) or self.walk_list(self.args, visitor, accumulator)
@@ -71,7 +74,8 @@ class ApplTerm(Term):
 
 
 class ListTerm(Term):
-    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map', 'key']
+    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
+                         'key']
 
     def __init__(self, items=None):
         Term.__init__(self)
@@ -104,7 +108,8 @@ class ListTerm(Term):
 
 
 class ListPatternTerm(Term):
-    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map', 'key']
+    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
+                         'key']
 
     def __init__(self, vars=None, rest=None):
         Term.__init__(self)
@@ -128,7 +133,8 @@ class ListPatternTerm(Term):
 
 
 class IntTerm(Term):
-    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map', 'key']
+    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
+                         'key']
 
     def __init__(self, value):
         Term.__init__(self)
@@ -145,7 +151,8 @@ class IntTerm(Term):
 
 
 class VarTerm(Term):
-    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map', 'key']
+    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
+                         'key']
 
     def __init__(self, name, slot=-1, index=-1):
         Term.__init__(self)
@@ -164,7 +171,8 @@ class VarTerm(Term):
 
 
 class MapWriteTerm(Term):
-    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map', 'key']
+    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
+                         'key']
 
     def __init__(self, assignments=None):
         Term.__init__(self)
@@ -173,7 +181,7 @@ class MapWriteTerm(Term):
     def walk(self, visitor, accumulator=None):
         result = None
         for a in self.assignments:
-            result = visitor(a, accumulator) # TODO store assignment keys as VarTerms
+            result = visitor(a, accumulator)  # TODO store assignment keys as VarTerms
             if result:
                 break
             result = visitor(self.assignments[a], accumulator)
@@ -192,7 +200,8 @@ class MapWriteTerm(Term):
 
 
 class MapReadTerm(Term):
-    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map', 'key']
+    _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
+                         'key']
 
     def __init__(self, map, key):
         Term.__init__(self)

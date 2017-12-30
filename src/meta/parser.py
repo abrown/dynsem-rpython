@@ -1,5 +1,5 @@
-from src.meta.context import SlotAssigner
 from src.meta.dynsem import *
+from src.meta.slot_assigner import SlotAssigner
 from src.meta.term import *
 from src.meta.tokenizer import *
 
@@ -22,14 +22,21 @@ class Parser:
     def term(text):
         """Helper method for parsing a single term"""
         term = Parser(text).__parse_term()
-        SlotAssigner().assign_term(term)  # TODO should we really do this?
+        return term
+
+    @staticmethod
+    def native_function(text):
+        """Helper method for parsing a single term; has slot assignment for native contexts"""
+        term = Parser(text).__parse_term()
+        assigned = SlotAssigner().assign_term(term)
+        if assigned != 2:
+            print("Expected native function to have two terms assigned: " + term.to_string())
         return term
 
     @staticmethod
     def rule(text):
         """Helper method for parsing a single rule"""
         rule = Parser(text).__parse_rule()
-        rule.slots = SlotAssigner().assign_rule(rule)
         return rule
 
     @staticmethod
@@ -246,4 +253,7 @@ class Parser:
                     break
             self.__possible(PeriodToken)
 
-        return Rule(before, after, components, premises)
+        # assign slot numbers
+        number_of_bound_terms = SlotAssigner().assign_rule(before, after, premises)
+
+        return Rule(before, after, components, premises, number_of_bound_terms)

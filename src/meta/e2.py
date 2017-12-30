@@ -24,12 +24,12 @@ def write(s, unused):
 
 
 native_functions = [
-    NativeFunction(Parser.term("write(x)"), write),  # TODO rpython demands it
-    NativeFunction(Parser.term("add(x, y)"), lambda x, y: x + y),
-    NativeFunction(Parser.term("sub(x, y)"), lambda x, y: x - y),
-    NativeFunction(Parser.term("mul(x, y)"), lambda x, y: x * y),
-    NativeFunction(Parser.term("div(x, y)"), lambda x, y: x // y),
-    NativeFunction(Parser.term("leq(x, y)"), lambda x, y: int(x <= y))
+    NativeFunction(Parser.native_function("write(x)"), write),  # TODO rpython demands it
+    NativeFunction(Parser.native_function("add(x, y)"), lambda x, y: x + y),
+    NativeFunction(Parser.native_function("sub(x, y)"), lambda x, y: x - y),
+    NativeFunction(Parser.native_function("mul(x, y)"), lambda x, y: x * y),
+    NativeFunction(Parser.native_function("div(x, y)"), lambda x, y: x // y),
+    NativeFunction(Parser.native_function("leq(x, y)"), lambda x, y: int(x <= y))
 ]
 
 e2 = Module(rules, native_functions)

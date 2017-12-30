@@ -67,26 +67,29 @@ class Interpreter:
 
         while term is not None and isinstance(term, ApplTerm):
             if self.debug:
-                print("Term: %s" % term.to_string())
+                print("%sTerm: %s" % (" " * self.nesting, term.to_string()))
 
             if not term.trans:
+                # TODO this may not work when the term has to match more than one rule
                 term.trans = self.find_transformation(term)
+            elif self.debug:
+                print("%sFound cached rule on: %s" % (" " * self.nesting, term.to_string()))
 
             transformation = term.trans
             if transformation is None:
                 if self.debug:
-                    print("No transformation found, returning")
+                    print("%sNo transformation found, returning" % (" " * self.nesting))
                 break  # unable to transform this appl, must be terminal
             elif isinstance(transformation, Rule):
                 if self.debug:
-                    print("Rule: %s" % transformation.to_string())
+                    print("%sRule: %s" % (" " * self.nesting, transformation.to_string()))
                 if transformation.has_loop:
                     term = self.transform_looping_rule(term, transformation)
                 else:
                     term = self.transform_rule(term, transformation)
             elif isinstance(transformation, NativeFunction):
                 if self.debug:
-                    print("Native: %s" % transformation.to_string())
+                    print("%sNative: %s" % (" " * self.nesting, transformation.to_string()))
                 term = self.transform_native_function(term, transformation)
             else:
                 raise NotImplementedError()
@@ -107,7 +110,7 @@ class Interpreter:
     # not sure if I want to: @unroll_safe
     def transform_looping_rule(self, term, rule):
         if self.debug:
-            print("Looping")
+            print("%sLooping" % (" " * self.nesting))
         jitdriver.can_enter_jit(term=term, rule=rule, interpreter=self)
         jitdriver.jit_merge_point(term=term, rule=rule, interpreter=self)
         term = promote(term)
@@ -116,11 +119,13 @@ class Interpreter:
 
     @unroll_safe
     def transform_rule(self, term, rule):
-        context = Context(rule.slots)
+        context = Context(term, rule.number_of_bound_terms)
         # for component in rule.components:
         # context.bind(component, self.environment)
         # TODO re-enable when we can bind the environment name to the context
         context.bind(rule.before, term)
+        if self.debug:
+            print("%sContext: %s" % (" " * self.nesting, context))
 
         # handle premises
         if rule.premises:
@@ -148,15 +153,18 @@ class Interpreter:
             if resolved_key.index < 0:
                 resolved_key.index = self.environment.locate(resolved_key.name)
             return self.environment.get(resolved_key.index)
+        # TODO perhaps the Map*Terms should return not themselves but the saved/retrieved value
 
         result = context.resolve(rule.after)
+        if self.debug:
+            print("%sResult: %s" % (" " * self.nesting, result))
         return result
 
     @unroll_safe
     def transform_premise(self, premise, context):
         if isinstance(premise, PatternMatchPremise):
             if premise.right.matches(premise.left):
-                context.bind(premise.left, premise.right)
+                context.bind(premise.left, premise.right)  # TODO seems like it should be context.resolve(premise.right)
             else:
                 raise DynsemError("Expected %s to match %s" % (premise.left, premise.right))
         elif isinstance(premise, EqualityCheckPremise):
@@ -194,7 +202,7 @@ class Interpreter:
 
     @unroll_safe
     def transform_native_function(self, term, native_function):
-        context = Context(native_function.slots)
+        context = Context(term, native_function.number_of_bound_terms)
         context.bind(native_function.before, term)
 
         args = []
@@ -212,4 +220,6 @@ class Interpreter:
         tuple_args = (args[0], args[1])  # TODO RPython demands this
 
         result = native_function.action(*tuple_args)
+        if self.debug:
+            print("%sResult: %s" % (" " * self.nesting, result))
         return IntTerm(result)  # TODO need to determine what type of term to use, not hard-code this

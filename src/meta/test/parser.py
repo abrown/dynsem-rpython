@@ -39,16 +39,15 @@ class TestParser(unittest.TestCase):
 
         term = Parser.term(text)
 
-        self.assertEqual(ApplTerm("a", [VarTerm("x", 0), VarTerm("y", 1)]), term)
+        self.assertEqual(ApplTerm("a", [VarTerm("x"), VarTerm("y")]), term)
 
     def test_rules(self):
         text = """a(x, y) --> b where 1 == 1"""
 
         parsed = Parser.rule(text)
 
-        expected = Rule(ApplTerm("a", [VarTerm("x", 0), VarTerm("y", 1)]), VarTerm("b"))
+        expected = Rule(ApplTerm("a", [VarTerm("x", 0), VarTerm("y", 1)]), VarTerm("b"), None, None, 2)
         expected.premises.append(EqualityCheckPremise(IntTerm(1), IntTerm(1)))
-        expected.slots = 2
 
         self.assertEqual(expected, parsed)
 
@@ -63,8 +62,8 @@ class TestParser(unittest.TestCase):
         mod = sut.all()
 
         self.assertEqual(2, len(mod.rules))
-        self.assertEqual(ApplTerm("Lit", [VarTerm("s")]), mod.rules[0].before)
-        self.assertEqual(ApplTerm("NumV", [ApplTerm("addI", [VarTerm("a"), VarTerm("b")])]), mod.rules[1].after)
+        self.assertEqual(ApplTerm("Lit", [VarTerm("s", 0)]), mod.rules[0].before)
+        self.assertEqual(ApplTerm("NumV", [ApplTerm("addI", [VarTerm("a", 0), VarTerm("b", 1)])]), mod.rules[1].after)
 
     def test_environment_write(self):
         rule = Parser.rule("E |- bindVar(x, v) --> {x |--> v, E}")
@@ -100,6 +99,11 @@ class TestParser(unittest.TestCase):
         self.assertIsInstance(term, ApplTerm)
         self.assertEqual(3, len(term.args))
         self.assertEqual("leq", term.args[0].name)
+
+    def test_slot_assignment(self):
+        rule = Parser.rule("block([x | xs]) --> block(xs) where x --> y")
+
+        self.assertEqual(3, rule.number_of_bound_terms)
 
 
 if __name__ == '__main__':
