@@ -33,11 +33,11 @@ class Module:
 
 
 class Transformation(Printable):
-    _immutable_fields_ = ['before', 'bound_terms']
+    _immutable_fields_ = ['before', 'number_of_bound_terms']
 
     def __init__(self, before, number_of_bound_terms=0):
         self.before = before
-        self.bound_terms = [None] * number_of_bound_terms
+        self.number_of_bound_terms = number_of_bound_terms
 
     def matches(self, term):
         return self.before.matches(term)

@@ -103,7 +103,7 @@ class TestParser(unittest.TestCase):
     def test_slot_assignment(self):
         rule = Parser.rule("block([x | xs]) --> block(xs) where x --> y")
 
-        self.assertEqual(3, len(rule.bound_terms))
+        self.assertEqual(3, rule.number_of_bound_terms)
 
 
 if __name__ == '__main__':

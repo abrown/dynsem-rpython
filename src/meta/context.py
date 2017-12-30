@@ -20,8 +20,10 @@ class ContextError(Exception):
 class Context:
     _immutable_ = True
 
-    def __init__(self, bound_terms):
-        self.bound_terms = bound_terms
+    def __init__(self, appl_term, number_of_bound_terms):
+        if appl_term.bound_terms is None:
+            appl_term.bound_terms = [None] * number_of_bound_terms
+        self.bound_terms = appl_term.bound_terms
 
     @unroll_safe
     def bind(self, pattern, term):

@@ -88,10 +88,10 @@ class TestE2(unittest.TestCase):
         """
 
         term = Parser.term(program)
-        interpreter = Interpreter(e2, 1)
+        interpreter = Interpreter(e2)
 
         # TODO fix that E somehow gets saved on the environment
-        result = interpreter.interpret(term)
+        interpreter.interpret(term)
 
         # 328 seems about right: http://www.wolframalpha.com/input/?i=sum+primes+up+to+50&x=0&y=0
         self.assertEqual(interpreter.environment.locate_and_get("s"), IntTerm(328))

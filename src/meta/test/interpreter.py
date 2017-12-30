@@ -112,9 +112,10 @@ class TestInterpreter(unittest.TestCase):
     def test_recursive_contexts(self):
         ifz_rule = Parser.rule("ifz(cond, then, else) --> ifzc(value, then, else) where cond --> value")
         ifz0_rule = Parser.rule("ifzc(0, then, else) --> then")
-        ifz1_rule = Parser.rule("ifzc(nonzero, then, else) --> else")  # TODO need inequality check, e.g. where non_zero != 0
+        ifz1_rule = Parser.rule("ifzc(nonzero, then, else) --> else")
+        # TODO need inequality check, e.g. where non_zero != 0
         module = Module([ifz_rule, ifz0_rule, ifz1_rule])
-        interpreter = Interpreter(module, 1)
+        interpreter = Interpreter(module)
 
         result = interpreter.interpret(Parser.term("ifz(ifz(1, 2, 3), 4, 5)"))
         self.assertEqual(IntTerm(5), result)

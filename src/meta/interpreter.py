@@ -70,7 +70,8 @@ class Interpreter:
                 print("%sTerm: %s" % (" " * self.nesting, term.to_string()))
 
             if not term.trans:
-                term.trans = self.find_transformation(term) # TODO this may not work when the term has to match more than one rule
+                # TODO this may not work when the term has to match more than one rule
+                term.trans = self.find_transformation(term)
             elif self.debug:
                 print("%sFound cached rule on: %s" % (" " * self.nesting, term.to_string()))
 
@@ -118,12 +119,13 @@ class Interpreter:
 
     @unroll_safe
     def transform_rule(self, term, rule):
-        context = Context(rule.bound_terms)
+        context = Context(term, rule.number_of_bound_terms)
         # for component in rule.components:
         # context.bind(component, self.environment)
         # TODO re-enable when we can bind the environment name to the context
         context.bind(rule.before, term)
-        print("%sContext: %s" % (" " * self.nesting, context))
+        if self.debug:
+            print("%sContext: %s" % (" " * self.nesting, context))
 
         # handle premises
         if rule.premises:
@@ -154,7 +156,8 @@ class Interpreter:
         # TODO perhaps the Map*Terms should return not themselves but the saved/retrieved value
 
         result = context.resolve(rule.after)
-        print("%sResult: %s" % (" " * self.nesting, result))
+        if self.debug:
+            print("%sResult: %s" % (" " * self.nesting, result))
         return result
 
     @unroll_safe
@@ -199,7 +202,7 @@ class Interpreter:
 
     @unroll_safe
     def transform_native_function(self, term, native_function):
-        context = Context(native_function.bound_terms)
+        context = Context(term, native_function.number_of_bound_terms)
         context.bind(native_function.before, term)
 
         args = []
@@ -217,5 +220,6 @@ class Interpreter:
         tuple_args = (args[0], args[1])  # TODO RPython demands this
 
         result = native_function.action(*tuple_args)
-        print("%sResult: %s" % (" " * self.nesting, result))
+        if self.debug:
+            print("%sResult: %s" % (" " * self.nesting, result))
         return IntTerm(result)  # TODO need to determine what type of term to use, not hard-code this
