@@ -40,12 +40,12 @@ class ApplTerm(Term):
     _immutable_fields = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
                          'key']
 
-    def __init__(self, name, args=None, trans=None):
+    def __init__(self, name, args=None, trans=None, bound_terms=None):
         Term.__init__(self)
         self.name = name
         self.args = list(args) if args else []
         self.trans = trans  # caches a matched transformation for this term
-        self.bound_terms = None  # caches the built context for the transformation matching this term
+        self.bound_terms = bound_terms  # caches the built context for the transformation matching this term
 
     def walk(self, visitor, accumulator=None):
         return visitor(self, accumulator) or self.walk_list(self.args, visitor, accumulator)
