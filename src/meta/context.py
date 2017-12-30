@@ -56,10 +56,8 @@ class Context:
     def resolve(self, term):
         """Using a context, resolve the names of free variables in a pattern to create a new term"""
         if isinstance(term, VarTerm) and term.slot >= 0:
-            resolved = self.bound_terms[term.slot]
-            if resolved is None:
-                raise ContextError("This should never be none: %s" % term.to_string())
-            return resolved
+            assert self.bound_terms[term.slot] is not None
+            return self.bound_terms[term.slot]
         elif isinstance(term, ApplTerm):
             return self.__resolve_appl(term)
         elif isinstance(term, ListTerm):
