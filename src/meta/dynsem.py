@@ -93,7 +93,7 @@ class Premise(Printable):
         self.right = right
 
     def to_string(self):
-        return "%s %s %s" % (self.left, "?", self.right)
+        return "%s %s %s" % (self.left.to_string(), "?", self.right.to_string())
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -113,7 +113,7 @@ class PatternMatchPremise(Premise):
         Premise.__init__(self, left, right)
 
     def to_string(self):
-        return "%s %s %s" % (self.left, "=>", self.right)
+        return "%s %s %s" % (self.left.to_string(), "=>", self.right.to_string())
 
 
 class EqualityCheckPremise(Premise):
@@ -123,7 +123,7 @@ class EqualityCheckPremise(Premise):
         Premise.__init__(self, left, right)
 
     def to_string(self):
-        return "%s %s %s" % (self.left, "==", self.right)
+        return "%s %s %s" % (self.left.to_string(), "==", self.right.to_string())
 
 
 class AssignmentPremise(Premise):
@@ -134,7 +134,7 @@ class AssignmentPremise(Premise):
         Premise.__init__(self, left, right)
 
     def to_string(self):
-        return "%s %s %s" % (self.left, "=>", self.right)
+        return "%s %s %s" % (self.left.to_string(), "=>", self.right.to_string())
 
 
 class ReductionPremise(Premise):
@@ -144,7 +144,7 @@ class ReductionPremise(Premise):
         Premise.__init__(self, left, right)
 
     def to_string(self):
-        return "%s %s %s" % (self.left, "-->", self.right)
+        return "%s %s %s" % (self.left.to_string(), "-->", self.right.to_string())
 
 
 class CasePremise(Premise):
@@ -162,4 +162,4 @@ class CasePremise(Premise):
             right = self.premises[i].to_string()
             sp = "%s => %s" % (left, right)
             subpremises.append(sp)
-        return "case %s of {%s}" % (self.left, "; ".join(subpremises))
+        return "case %s of {%s}" % (self.left.to_string(), "; ".join(subpremises))

@@ -28,12 +28,12 @@ except ImportError:
         return func
 
 
-def get_location(term, rule):
-    return "%s" % (term.to_string())
+def get_location(rule):
+    return "%s" % (rule.to_string())
 
 
 # jitdriver = JitDriver(greens=['term', 'rule'], reds='auto', get_printable_location=get_location)
-jitdriver = JitDriver(greens=['term', 'rule'], reds=['interpreter'], get_printable_location=get_location)
+jitdriver = JitDriver(greens=['rule'], reds=['term', 'interpreter'], get_printable_location=get_location)
 
 
 def jitpolicy(driver):

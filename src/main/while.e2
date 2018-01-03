@@ -1,8 +1,8 @@
 block([
     assign(a, 0),
-    assign(max, 100000),
+    assign(max, 10000000),
     while(leq(retrieve(a), retrieve(max)),
-        assign(a, add(retrieve(a), 1))
+        block([assign(a, add(retrieve(a), 1))])
     ),
     write(retrieve(a))
 ])
