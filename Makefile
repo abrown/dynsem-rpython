@@ -46,6 +46,9 @@ run-pypy: src/main/sumprimes.py
 run-c: bin/sumprimes
 	time bin/sumprimes
 
+run-while: bin/e2
+	PYPYLOG=jit:${LOG} time $< src/main/while.e2
+
 show-last-log:
 	less -N $(shell ls e2-*.log | tail -n 1)
 
