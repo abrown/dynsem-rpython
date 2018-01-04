@@ -3,10 +3,11 @@ from src.meta.printable import Printable
 
 class Term(Printable):
     _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
+                          'key']
 
-    def __init__(self):
-        pass
+    def __init__(self, cells=None, var_offsets=None):
+        self.cells = cells if cells else []
+        self.var_offsets = var_offsets if var_offsets else []
 
     def walk(self, visitor, accumulator=None):
         return visitor(self, accumulator)
@@ -34,16 +35,34 @@ class Term(Printable):
             return not self.__eq__(other)
         return NotImplemented
 
+    def to_string(self):
+        for c in self.cells:
+            if
+
+
+class Cell(Printable):
+    _immutable_ = True
+    
+    def __init__(self):
+        pass
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        return NotImplemented
+
+    def __ne__(self, other):
+        if isinstance(other, self.__class__):
+            return not self.__eq__(other)
+        return NotImplemented
+
 
 # TODO refactor this into ListTerm
-class ApplTerm(Term):
-    _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
-
-    def __init__(self, name, args=None, trans=None, bound_terms=None):
-        Term.__init__(self)
+class ApplTerm(Cell):
+    def __init__(self, name, size=0, trans=None, bound_terms=None):
+        Cell.__init__(self)
         self.name = name
-        self.args = list(args) if args else []
+        self.size = size
         self.trans = trans  # caches a matched transformation for this term
         self.bound_terms = bound_terms  # caches the built context for the transformation matching this term
 
@@ -67,19 +86,13 @@ class ApplTerm(Term):
         return True
 
     def to_string(self):
-        args = []
-        for a in self.args:
-            args.append(a.to_string())
-        return self.name if not self.args else "%s(%s)" % (self.name, ", ".join(args))
+        return self.name
 
 
-class ListTerm(Term):
-    _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
-
-    def __init__(self, items=None):
-        Term.__init__(self)
-        self.items = list(items) if items else []
+class ListTerm(Cell):
+    def __init__(self, size=0):
+        Cell.__init__(self)
+        self.size = size
 
     def walk(self, visitor, accumulator=None):
         return self.walk_list(self.items, visitor, accumulator)
@@ -101,20 +114,14 @@ class ListTerm(Term):
         return True
 
     def to_string(self):
-        args = []
-        for a in self.items:
-            args.append(a.to_string())
-        return "[%s]" % (", ".join(args))
+        return "list#%d" % self.size
 
 
-class ListPatternTerm(Term):
-    _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
-
-    def __init__(self, vars=None, rest=None):
-        Term.__init__(self)
-        self.vars = list(vars) if vars else []
-        self.rest = rest
+class ListPatternTerm(Cell):
+    def __init__(self, size=0, tail_offset=0):
+        Cell.__init__(self)
+        self.size = size
+        self.tail_offset = tail_offset
 
     def walk(self, visitor, accumulator=None):
         return self.walk_list(self.vars, visitor, accumulator) or visitor(self.rest, accumulator)
@@ -126,18 +133,12 @@ class ListPatternTerm(Term):
             return True
 
     def to_string(self):
-        args = []
-        for a in self.vars:
-            args.append(a.to_string())
-        return "[%s | %s]" % (", ".join(args), self.rest)
+        return "listpattern#%d" % self.size
 
 
-class IntTerm(Term):
-    _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
-
+class IntTerm(Cell):
     def __init__(self, value):
-        Term.__init__(self)
+        Cell.__init__(self)
         self.number = value
 
     def equals(self, term):
@@ -150,12 +151,9 @@ class IntTerm(Term):
         return str(self.number)
 
 
-class VarTerm(Term):
-    _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
-
+class VarTerm(Cell):
     def __init__(self, name, slot=-1, index=-1):
-        Term.__init__(self)
+        Cell.__init__(self)
         self.name = name
         self.slot = slot
         self.index = index
@@ -170,12 +168,9 @@ class VarTerm(Term):
         return hash(self.name)
 
 
-class MapWriteTerm(Term):
-    _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
-
+class MapWriteTerm(Cell):
     def __init__(self, assignments=None):
-        Term.__init__(self)
+        Cell.__init__(self)
         self.assignments = assignments if assignments else {}
 
     def walk(self, visitor, accumulator=None):
@@ -199,12 +194,9 @@ class MapWriteTerm(Term):
         return "{%s}" % (", ".join(args))
 
 
-class MapReadTerm(Term):
-    _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
-
+class MapReadTerm(Cell):
     def __init__(self, map, key):
-        Term.__init__(self)
+        Cell.__init__(self)
         self.map = map  # the map name
         self.key = key  # the key to retrieve from it
 

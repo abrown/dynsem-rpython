@@ -13,7 +13,38 @@ class ParseError(Exception):
         return self.reason + " at token " + str(self.token)
 
 
-class Parser:
+class PlaceholderCell(Cell):
+    pass
+
+
+class TermCollector:
+    def __init__(self):
+        self.cells = []
+        self.var_terms = []
+        self.offset = 0
+
+    def add_cell(self, cell):
+        assert cell is not None
+        self.cells.append(cell)
+        previous_offset = self.offset
+        self.offset += 1
+        return previous_offset
+
+    def add_variable_cell(self, cell):
+        assert cell is not None and isinstance(cell, VarTerm)
+        self.cells.append(cell)
+        self.var_terms.append(self.offset)
+        previous_offset = self.offset
+        self.offset += 1
+        return previous_offset
+
+    def visit(self, visitor, start=0, end=-1):
+        end = end if end > -1 else self.offset
+        for i in range(start, end):
+            visitor(self.cells[i])
+
+
+class FlatParser:
     def __init__(self, text):
         self.tokenizer = Tokenizer(text)
         self.module = Module()
@@ -21,28 +52,29 @@ class Parser:
     @staticmethod
     def term(text):
         """Helper method for parsing a single term"""
-        term = Parser(text).__parse_term()
-        return term
+        collector = TermCollector()
+        number_of_subterms = FlatParser(text).__parse_term(collector)
+        return Term(collector.cells, collector.var_terms) if number_of_subterms else None
 
-    @staticmethod
-    def native_function(text):
-        """Helper method for parsing a single term; has slot assignment for native contexts"""
-        term = Parser(text).__parse_term()
-        assigned = SlotAssigner().assign_term(term)
-        if assigned != 2:
-            print("Expected native function to have two terms assigned: " + term.to_string())
-        return term
+    # @staticmethod
+    # def native_function(text):
+    #     """Helper method for parsing a single term; has slot assignment for native contexts"""
+    #     term = Parser(text).__parse_term()
+    #     assigned = SlotAssigner().assign_term(term)
+    #     if assigned != 2:
+    #         print("Expected native function to have two terms assigned: " + term.to_string())
+    #     return term
 
-    @staticmethod
-    def rule(text):
-        """Helper method for parsing a single rule"""
-        rule = Parser(text).__parse_rule()
-        return rule
+    # @staticmethod
+    # def rule(text):
+    #     """Helper method for parsing a single rule"""
+    #     rule = Parser(text).__parse_rule()
+    #     return rule
 
-    @staticmethod
-    def premise(text):
-        """Helper method for parsing a single premise"""
-        return Parser(text).__parse_premise()
+    # @staticmethod
+    # def premise(text):
+    #     """Helper method for parsing a single premise"""
+    #     return Parser(text).__parse_premise()
 
     def next(self):
         """Parse one token and update the Module"""
@@ -110,43 +142,77 @@ class Parser:
             self.tokenizer.undo(token)
             return None
 
-    def __parse_term_pre(self):
-        collector = TermCollector()
-        return Term(collector.cells, collector.var_terms)
-
     def __parse_term(self, collector):
+        start_offset = collector.offset
         token = self.tokenizer.next()
         if isinstance(token, IdToken):
-            return self.__parse_identifier(token, collector)
+            self.__parse_identifier(token, collector)
         elif isinstance(token, NumberToken):
-            return IntTerm(0 if token.value is None else int(token.value))
+            cell = IntTerm(0 if token.value is None else int(token.value))
+            collector.add_cell(cell)
         elif isinstance(token, LeftBraceToken):
-            return self.__parse_new_environment(token)
+            self.__parse_new_environment(token)
         elif isinstance(token, LeftBracketToken):
-            return self.__parse_list(token)
+            self.__parse_list(token, collector)
         else:
             self.tokenizer.undo(token)
-            return None
+        end_offset = collector.offset
+        return end_offset - start_offset
 
     def __parse_identifier(self, id_token, collector):
-        start_offset = collector.offset
         if self.__possible(LeftParensToken):
-            args = []
-            while True:
-                arg = self.__parse_term(collector)
-                if arg is None:
-                    break
-                args.append(arg)
-                self.__possible(CommaToken)
-            self.__expect(RightParensToken)
-            return ApplTerm(id_token.value, args)
-        if self.__possible(LeftBracketToken):
+            self.__parse_appl(id_token, collector)
+        elif self.__possible(LeftBracketToken):
             name = self.__expect(IdToken)
             self.__expect(RightBracketToken)
             return MapReadTerm(VarTerm(id_token.value), VarTerm(name.value))
         else:
-            return VarTerm(id_token.value)
+            collector.add_variable_cell(VarTerm(id_token.value))
+
+    def __parse_appl(self, id_token, collector):
+        appl_term = ApplTerm(id_token.value)
+        collector.add_cell(appl_term)
+        start_offset = collector.offset
+        while True:
+            number_of_subterms = self.__parse_term(collector)
+            if number_of_subterms < 1:
+                break
+            self.__possible(CommaToken)
+        self.__expect(RightParensToken)
         end_offset = collector.offset
+        appl_term.size = end_offset - start_offset
+
+    def __parse_list(self, token, collector):
+        start_offset = collector.add_cell(PlaceholderCell())
+
+        # normal list
+        while True:
+            number_of_subterms = self.__parse_term(collector)
+            if number_of_subterms < 1:
+                break
+            if not self.__possible(CommaToken):
+                break
+
+        # list pattern
+        if self.__possible_value(OperatorToken, "|"):
+            def assert_var_term(t):
+                if not isinstance(t, VarTerm):
+                    raise ParseError("Expected list pattern to only include VarTerms", token)
+
+            # parse the 'tail' term (e.g. [head | tail])
+            self.__expect_term()
+
+            # assert all terms are VarTerms (e.g. [x1, x2, x3 | xs])
+            collector.visit(assert_var_term, collector.offset)
+
+            replacement_cell = ListPatternTerm(collector.offset - start_offset, collector.offset)
+        else:
+            replacement_cell = ListTerm(collector.offset - start_offset)
+
+        self.__expect(RightBracketToken)
+
+        # replace the placeholder
+        collector.cells[start_offset] = replacement_cell
 
     def __parse_new_environment(self, token):
         assignments = {}
@@ -164,32 +230,6 @@ class Parser:
             self.__possible(CommaToken)
         self.__expect(RightBraceToken)
         return MapWriteTerm(assignments)
-
-    def __parse_list(self, token):
-        items = []
-
-        # normal list
-        while True:
-            term = self.__parse_term()
-            if term is None:
-                break
-            items.append(term)
-            if not self.__possible(CommaToken):
-                break
-
-        # list pattern
-        if self.__possible_value(OperatorToken, "|"):
-            for i in items:
-                if not isinstance(i, VarTerm):
-                    raise ParseError("Expected list pattern to only include VarTerms", token)
-            rest = self.__expect_term()
-            if not isinstance(rest, VarTerm):
-                raise ParseError("Expected list pattern to only include VarTerms", token)
-            self.__expect(RightBracketToken)
-            return ListPatternTerm(items, rest)
-        else:
-            self.__expect(RightBracketToken)
-            return ListTerm(items)
 
     def __expect_term(self):
         term = self.__parse_term()
@@ -263,10 +303,3 @@ class Parser:
         number_of_bound_terms = SlotAssigner().assign_rule(before, after, premises)
 
         return Rule(before, after, components, premises, number_of_bound_terms)
-
-
-class TermCollector:
-    def __init__(self):
-        self.cells = []
-        self.var_terms = []
-        self.offset = 0
