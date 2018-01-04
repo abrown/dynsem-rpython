@@ -35,14 +35,52 @@ class Term(Printable):
             return not self.__eq__(other)
         return NotImplemented
 
+    def to_joining_string(self, string, start, end):
+        for cursor in range(start, end):
+            string += self.to_string_from_cell(cursor)
+            string += ", "
+
+    def to_assignment_joining_string(self, string, start, end):
+        for cursor in range(start, end):
+            string += self.to_string_from_cell(string, cursor)
+            string += " --> "
+            string += self.to_string_from_cell(string, cursor)
+            string += ", "
+            # TODO handle single varterms
+
+    def to_string_from_cell(self, string, cursor):
+        cell = self.cells[cursor]
+        if isinstance(cell, ApplTerm):
+            string += cell.to_string() + "("
+            string += self.to_joining_string(string, cursor, cursor + cell.size)
+            string += ")"
+        elif isinstance(cell, ListTerm):
+            string += "["
+            string += self.to_joining_string(string, cursor, cursor + cell.size)
+            string += "]"
+        elif isinstance(cell, ListPatternTerm):
+            string += "["
+            string += self.to_joining_string(string, cursor, cursor + cell.size - 1)
+            string += ("| %s ]" % self.cells[cell.tail_offset].to_string())
+        elif isinstance(cell, MapReadTerm):
+            string += cell.to_string() + "["
+            string += self.to_string_from_cell(string, cursor + 1)
+            string += "]"
+        elif isinstance(cell, MapWriteTerm):
+            string += "{"
+            string += self.to_joining_string(string, cursor, cursor + cell.size - 1)
+            string += "}"
+        else:
+            string += cell.to_string()
+        return string
+
     def to_string(self):
-        for c in self.cells:
-            if
+        return self.to_string_from_cell("", 0)
 
 
 class Cell(Printable):
     _immutable_ = True
-    
+
     def __init__(self):
         pass
 
@@ -59,10 +97,11 @@ class Cell(Printable):
 
 # TODO refactor this into ListTerm
 class ApplTerm(Cell):
-    def __init__(self, name, size=0, trans=None, bound_terms=None):
+    def __init__(self, name, size=0, end_offset=0, trans=None, bound_terms=None):
         Cell.__init__(self)
         self.name = name
         self.size = size
+        self.end_offset = end_offset
         self.trans = trans  # caches a matched transformation for this term
         self.bound_terms = bound_terms  # caches the built context for the transformation matching this term
 
@@ -90,9 +129,10 @@ class ApplTerm(Cell):
 
 
 class ListTerm(Cell):
-    def __init__(self, size=0):
+    def __init__(self, size=0, end_offset=0):
         Cell.__init__(self)
         self.size = size
+        self.end_offset = end_offset
 
     def walk(self, visitor, accumulator=None):
         return self.walk_list(self.items, visitor, accumulator)
@@ -117,23 +157,8 @@ class ListTerm(Cell):
         return "list#%d" % self.size
 
 
-class ListPatternTerm(Cell):
-    def __init__(self, size=0, tail_offset=0):
-        Cell.__init__(self)
-        self.size = size
-        self.tail_offset = tail_offset
-
-    def walk(self, visitor, accumulator=None):
-        return self.walk_list(self.vars, visitor, accumulator) or visitor(self.rest, accumulator)
-
-    def matches(self, term):
-        if not isinstance(term, ListTerm) or len(self.vars) > len(term.items):
-            return False
-        else:
-            return True
-
-    def to_string(self):
-        return "listpattern#%d" % self.size
+class ListPatternTerm(ListTerm):
+    pass
 
 
 class IntTerm(Cell):
@@ -169,9 +194,10 @@ class VarTerm(Cell):
 
 
 class MapWriteTerm(Cell):
-    def __init__(self, assignments=None):
+    def __init__(self, size=0, end_offset=0):
         Cell.__init__(self)
-        self.assignments = assignments if assignments else {}
+        self.size = size
+        self.end_offset = end_offset
 
     def walk(self, visitor, accumulator=None):
         result = None
@@ -184,24 +210,18 @@ class MapWriteTerm(Cell):
                 break
         return result
 
-    def to_string(self):
-        args = []
-        for key in self.assignments:
-            if isinstance(self.assignments[key], MapWriteTerm):
-                args.append(key.to_string())
-            else:
-                args.append("%s |--> %s" % (key.to_string(), self.assignments[key].to_string()))
-        return "{%s}" % (", ".join(args))
+
+class AssignmentTerm(Cell):
+    def __init__(self, end_offset):
+        Cell.__init__(self)
+        self.end_offset = end_offset
 
 
 class MapReadTerm(Cell):
-    def __init__(self, map, key):
+    def __init__(self, end_offset=0):
         Cell.__init__(self)
-        self.map = map  # the map name
-        self.key = key  # the key to retrieve from it
+        self.end_offset = end_offset
 
     def walk(self, visitor, accumulator=None):
         return visitor(self.map, accumulator) or visitor(self.key, accumulator)
 
-    def to_string(self):
-        return "%s[%s]" % (self.map, self.key)

@@ -1,32 +1,15 @@
 import unittest
 
 from src.meta.flat_parser import FlatParser
-from src.meta.term import Term, ApplTerm, VarTerm, IntTerm, MapReadTerm, MapWriteTerm, ListTerm
+from src.meta.term import Term, ApplTerm, VarTerm, IntTerm, ListTerm, ListPatternTerm, MapReadTerm, MapWriteTerm, \
+    AssignmentTerm
 
 
 class TestFlatParser(unittest.TestCase):
-    # def assertTermEqual(self, expected, actual):
-    #     if len(expected) is not len(actual):
-    #         raise AssertionError("Lengths do not match: {} != {}".format(expected, actual))
-    #     for i, e in enumerate(expected):
-    #         self.assertIsInstance(actual[i], e.__class__)
-    #         self.assertEqual(e.location, actual[i].location) if e.location else None
-    #         self.assertEqual(e.value, actual[i].value) if e.value else None
-
     def assertParsedTermEqual(self, text, expected):
         actual = FlatParser.term(text)
-
-        if len(expected.cells) is not len(actual.cells):
-            raise AssertionError("Cell lengths do not match: {} != {}".format(expected.cells, actual.cells))
-
-        for i, e in enumerate(expected.cells):
-            self.assertEqual(actual.cells[i], e)
-
-        if len(expected.var_offsets) is not len(actual.var_offsets):
-            raise AssertionError("Variable offset lengths do not match: {} != {}".format(expected.var_offsets, actual.var_offsets))
-
-        for i, e in enumerate(expected.var_offsets):
-            self.assertEqual(actual.var_offsets[i], e)
+        self.assertEqual(expected.cells, actual.cells)
+        self.assertEqual(expected.var_offsets, actual.var_offsets)
 
     def test_int(self):
         self.assertParsedTermEqual("42", Term([IntTerm(42)]))
@@ -38,10 +21,29 @@ class TestFlatParser(unittest.TestCase):
         self.assertParsedTermEqual("a()", Term([ApplTerm("a")]))
 
     def test_simple_appl(self):
-        self.assertParsedTermEqual("a(b, 42)", Term([ApplTerm("a", 2), VarTerm("b"), IntTerm(42)], [1]))
+        self.assertParsedTermEqual("a(b, 42)", Term([ApplTerm("a", 2, 2), VarTerm("b"), IntTerm(42)], [1]))
+
+    def test_multi_var_appl(self):
+        self.assertParsedTermEqual("a(b, c(d), e)", Term(
+            [ApplTerm("a", 3, 4), VarTerm("b"), ApplTerm("c", 1, 3), VarTerm("d"), VarTerm("e")], [1, 2, 1]))
+
+    def test_empty_list(self):
+        self.assertParsedTermEqual("[]", Term([ListTerm()]))
 
     def test_list(self):
-        self.assertParsedTermEqual("[1, 2, three]", Term([ListTerm(3), IntTerm(1), IntTerm(2), VarTerm("three")], [2]))
+        self.assertParsedTermEqual("[1, 2, three]",
+                                   Term([ListTerm(3, 3), IntTerm(1), IntTerm(2), VarTerm("three")], [3]))
+
+    def test_list_pattern(self):
+        self.assertParsedTermEqual("[x, y | zs]",
+                                   Term([ListPatternTerm(3, 3), VarTerm("x"), VarTerm("y"), VarTerm("zs")], [1, 1, 1]))
+
+    def test_map_read(self):
+        self.assertParsedTermEqual("x[y]", Term([MapReadTerm(1), VarTerm("x"), VarTerm("y")], [1, 1]))
+
+    def test_map_write(self):
+        self.assertParsedTermEqual("{x |--> y, E}", Term(
+            [MapWriteTerm(2, 4), AssignmentTerm(3), VarTerm("x"), VarTerm("y"), VarTerm("E")], [2, 1, 1]))
 
     # def test_header(self):
     #     text = """0

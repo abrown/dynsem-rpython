@@ -20,26 +20,43 @@ class PlaceholderCell(Cell):
 class TermCollector:
     def __init__(self):
         self.cells = []
-        self.var_terms = []
-        self.offset = 0
+        self.offset_cursor = 0
+        self.var_relative_offsets = []
+        self.var_last_absolute_offset = 0
+
+    @staticmethod
+    def assert_var_term(term):
+        if not isinstance(term, VarTerm):
+            raise ParseError("Expected a variable term but found: " + term.to_string(), None)
 
     def add_cell(self, cell):
         assert cell is not None
         self.cells.append(cell)
-        previous_offset = self.offset
-        self.offset += 1
+        previous_offset = self.offset_cursor
+        self.offset_cursor += 1
         return previous_offset
 
     def add_variable_cell(self, cell):
         assert cell is not None and isinstance(cell, VarTerm)
-        self.cells.append(cell)
-        self.var_terms.append(self.offset)
-        previous_offset = self.offset
-        self.offset += 1
-        return previous_offset
+
+        if self.var_relative_offsets:
+            self.var_relative_offsets.append(self.offset_cursor - self.var_last_absolute_offset)
+        else:
+            self.var_relative_offsets.append(self.offset_cursor)
+        self.var_last_absolute_offset = self.offset_cursor
+
+        return self.add_cell(cell)
+
+    def last_offset(self):
+        return self.offset_cursor - 1
+
+    def replace(self, index, cell):
+        assert cell is not None
+        assert isinstance(self.cells[index], PlaceholderCell)
+        self.cells[index] = cell
 
     def visit(self, visitor, start=0, end=-1):
-        end = end if end > -1 else self.offset
+        end = end if end > -1 else self.offset_cursor
         for i in range(start, end):
             visitor(self.cells[i])
 
@@ -54,7 +71,7 @@ class FlatParser:
         """Helper method for parsing a single term"""
         collector = TermCollector()
         number_of_subterms = FlatParser(text).__parse_term(collector)
-        return Term(collector.cells, collector.var_terms) if number_of_subterms else None
+        return Term(collector.cells, collector.var_relative_offsets) if number_of_subterms else None
 
     # @staticmethod
     # def native_function(text):
@@ -143,7 +160,7 @@ class FlatParser:
             return None
 
     def __parse_term(self, collector):
-        start_offset = collector.offset
+        start_offset = collector.last_offset()
         token = self.tokenizer.next()
         if isinstance(token, IdToken):
             self.__parse_identifier(token, collector)
@@ -151,91 +168,108 @@ class FlatParser:
             cell = IntTerm(0 if token.value is None else int(token.value))
             collector.add_cell(cell)
         elif isinstance(token, LeftBraceToken):
-            self.__parse_new_environment(token)
+            self.__parse_map_write(token, collector)
         elif isinstance(token, LeftBracketToken):
             self.__parse_list(token, collector)
         else:
             self.tokenizer.undo(token)
-        end_offset = collector.offset
-        return end_offset - start_offset
+        return collector.last_offset() - start_offset
 
     def __parse_identifier(self, id_token, collector):
         if self.__possible(LeftParensToken):
             self.__parse_appl(id_token, collector)
         elif self.__possible(LeftBracketToken):
-            name = self.__expect(IdToken)
-            self.__expect(RightBracketToken)
-            return MapReadTerm(VarTerm(id_token.value), VarTerm(name.value))
+            self.__parse_map_read(id_token, collector)
         else:
             collector.add_variable_cell(VarTerm(id_token.value))
 
     def __parse_appl(self, id_token, collector):
-        appl_term = ApplTerm(id_token.value)
-        collector.add_cell(appl_term)
-        start_offset = collector.offset
+        start_offset = collector.add_cell(PlaceholderCell())
+        size = 0
+
         while True:
             number_of_subterms = self.__parse_term(collector)
             if number_of_subterms < 1:
                 break
+            else:
+                size += 1
             self.__possible(CommaToken)
         self.__expect(RightParensToken)
-        end_offset = collector.offset
-        appl_term.size = end_offset - start_offset
+
+        appl_term = ApplTerm(id_token.value, size, collector.last_offset())
+        collector.replace(start_offset, appl_term)
 
     def __parse_list(self, token, collector):
         start_offset = collector.add_cell(PlaceholderCell())
+        size = 0
 
         # normal list
         while True:
             number_of_subterms = self.__parse_term(collector)
             if number_of_subterms < 1:
                 break
+            else:
+                size += 1
             if not self.__possible(CommaToken):
                 break
 
         # list pattern
         if self.__possible_value(OperatorToken, "|"):
-            def assert_var_term(t):
-                if not isinstance(t, VarTerm):
-                    raise ParseError("Expected list pattern to only include VarTerms", token)
-
             # parse the 'tail' term (e.g. [head | tail])
-            self.__expect_term()
+            self.__expect_term(collector)
+            size += 1
 
             # assert all terms are VarTerms (e.g. [x1, x2, x3 | xs])
-            collector.visit(assert_var_term, collector.offset)
+            collector.visit(TermCollector.assert_var_term, start_offset + 1)
 
-            replacement_cell = ListPatternTerm(collector.offset - start_offset, collector.offset)
+            list_cell = ListPatternTerm(size, collector.last_offset())
         else:
-            replacement_cell = ListTerm(collector.offset - start_offset)
+            list_cell = ListTerm(size, collector.last_offset())
 
         self.__expect(RightBracketToken)
+        collector.replace(start_offset, list_cell)
 
-        # replace the placeholder
-        collector.cells[start_offset] = replacement_cell
+    def __parse_map_read(self, id_token, collector):
+        collector.add_cell(MapReadTerm(collector.last_offset() + 2))
+        collector.add_variable_cell(VarTerm(id_token.value))
+        map_key_name = self.__expect(IdToken)
+        collector.add_variable_cell(VarTerm(map_key_name.value))
+        self.__expect(RightBracketToken)
 
-    def __parse_new_environment(self, token):
-        assignments = {}
+    def __parse_map_write(self, token, collector):
+        start_offset = collector.add_cell(PlaceholderCell())
+        size = 0
+
         while True:
-            name = self.__parse_term()
-            if name is None:
+            left_id = self.__possible(IdToken)
+            if not left_id:
                 break
-            if not isinstance(name, VarTerm):
-                raise ParseError("Expected a variable term but found " + str(name), None)
-            if self.__possible_value(OperatorToken, "|-->"):
-                value = self.__expect_term()
             else:
-                value = MapWriteTerm()  # TODO this is by "convention" but not necessarily clear
-            assignments[name] = value
+                size += 1
+
+            if self.__possible_value(OperatorToken, "|-->"):
+                # add assignments (e.g. {a --> b})
+                right_id = self.__expect(IdToken)  # TODO this should parse a whole term
+
+                collector.add_cell(AssignmentTerm(collector.last_offset() + 3))
+                collector.add_variable_cell(VarTerm(left_id.value))
+                collector.add_variable_cell(VarTerm(right_id.value))
+            else:
+                # add source maps (e.g. {E})
+                collector.add_variable_cell(
+                    VarTerm(left_id.value))  # TODO this is by "convention" but not necessarily clear
+
             self.__possible(CommaToken)
         self.__expect(RightBraceToken)
-        return MapWriteTerm(assignments)
 
-    def __expect_term(self):
-        term = self.__parse_term()
-        if term is None:
+        map_write_cell = MapWriteTerm(size, collector.last_offset())
+        collector.replace(start_offset, map_write_cell)
+
+    def __expect_term(self, collector):
+        number_of_subterms = self.__parse_term(collector)
+        if number_of_subterms < 1:
             raise ParseError("Expected to parse a term", self.tokenizer.next())
-        return term
+        return number_of_subterms
 
     def __parse_premise(self):
         if self.__possible_value(KeywordToken, "case"):
