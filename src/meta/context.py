@@ -1,3 +1,4 @@
+from src.meta.printable import Printable
 from src.meta.term import VarTerm, ListPatternTerm, ListTerm, ApplTerm
 
 # So that you can still run this module under standard CPython...
@@ -17,7 +18,7 @@ class ContextError(Exception):
         self.reason = reason
 
 
-class Context:
+class Context(Printable):
     _immutable_ = True
 
     def __init__(self, appl_term, number_of_bound_terms):
@@ -83,5 +84,11 @@ class Context:
             resolved_items.append(self.resolve(term.items[i]))
         return ListTerm(resolved_items)
 
-    def __str__(self):
-        return str(self.bound_terms)
+    def to_string(self):
+        terms = []
+        for bt in self.bound_terms:
+            if bt is None:
+                terms.append("None")
+            else:
+                terms.append(bt.to_string())
+        return "[%s]" % (", ".join(terms))

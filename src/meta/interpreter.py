@@ -28,12 +28,12 @@ except ImportError:
         return func
 
 
-def get_location(rule):
+def get_location(rule, interpreter):
     return "%s" % (rule.to_string())
 
 
 # jitdriver = JitDriver(greens=['term', 'rule'], reds='auto', get_printable_location=get_location)
-jitdriver = JitDriver(greens=['rule'], reds=['term', 'interpreter'], get_printable_location=get_location)
+jitdriver = JitDriver(greens=['rule', 'interpreter'], reds=['term'], get_printable_location=get_location)
 
 
 def jitpolicy(driver):
@@ -61,40 +61,45 @@ class Interpreter:
         self.nesting = -1
 
     @unroll_safe
+    def log(self, label, printable=None):
+        """Simple method for standardizing log messages with a single printable substitution"""
+        if self.debug != 0:
+            if printable:
+                print("%s%s: %s" % (" " * self.nesting, label, printable.to_string()))
+            else:
+                print("%s%s" % (" " * self.nesting, label))
+
+    @unroll_safe
     def interpret(self, term):
-        if self.debug:
+        if self.debug != 0:
             self.nesting += 1
 
         while term is not None and isinstance(term, ApplTerm):
-            if self.debug:
-                print("%sTerm: %s" % (" " * self.nesting, term.to_string()))
+            self.log("term", term)
 
             if not term.trans:
                 # TODO this may not work when the term has to match more than one rule
                 term.trans = self.find_transformation(term)
-            elif self.debug:
-                print("%sFound cached rule on: %s" % (" " * self.nesting, term.to_string()))
+            else:
+                self.log("found cached rule on", term)
 
             transformation = term.trans
             if transformation is None:
-                if self.debug:
-                    print("%sNo transformation found, returning" % (" " * self.nesting))
+                self.log("no transformation found, returning", term)
                 break  # unable to transform this appl, must be terminal
             elif isinstance(transformation, Rule):
-                if self.debug:
-                    print("%sRule: %s" % (" " * self.nesting, transformation.to_string()))
+                self.log("rule", transformation)
                 if transformation.has_loop:
                     term = self.transform_looping_rule(term, transformation)
                 else:
                     term = self.transform_rule(term, transformation)
             elif isinstance(transformation, NativeFunction):
-                if self.debug:
-                    print("%sNative: %s" % (" " * self.nesting, transformation.to_string()))
+                self.log("native", transformation)
                 term = self.transform_native_function(term, transformation)
             else:
                 raise NotImplementedError()
 
-        if self.debug:
+        if self.debug != 0:
             self.nesting -= 1
         return term
 
@@ -109,8 +114,7 @@ class Interpreter:
 
     # not sure if I want to: @unroll_safe
     def transform_looping_rule(self, term, rule):
-        if self.debug:
-            print("%sLooping" % (" " * self.nesting))
+        self.log("looping", rule)
         jitdriver.can_enter_jit(term=term, rule=rule, interpreter=self)
         jitdriver.jit_merge_point(term=term, rule=rule, interpreter=self)
         term = promote(term)
@@ -124,8 +128,7 @@ class Interpreter:
         # context.bind(component, self.environment)
         # TODO re-enable when we can bind the environment name to the context
         context.bind(rule.before, term)
-        if self.debug:
-            print("%sContext: %s" % (" " * self.nesting, context))
+        self.log("context", context)
 
         # handle premises
         if rule.premises:
@@ -156,8 +159,7 @@ class Interpreter:
         # TODO perhaps the Map*Terms should return not themselves but the saved/retrieved value
 
         result = context.resolve(rule.after)
-        if self.debug:
-            print("%sResult: %s" % (" " * self.nesting, result))
+        self.log("result", result)
         return result
 
     @unroll_safe
@@ -204,6 +206,7 @@ class Interpreter:
     def transform_native_function(self, term, native_function):
         context = Context(term, native_function.number_of_bound_terms)
         context.bind(native_function.before, term)
+        self.log("context", context)
 
         args = []
         for arg in native_function.before.args:
@@ -219,7 +222,6 @@ class Interpreter:
             args.append(0)
         tuple_args = (args[0], args[1])  # TODO RPython demands this
 
-        result = native_function.action(*tuple_args)
-        if self.debug:
-            print("%sResult: %s" % (" " * self.nesting, result))
-        return IntTerm(result)  # TODO need to determine what type of term to use, not hard-code this
+        result = IntTerm(native_function.action(*tuple_args))  # TODO need to determine what type of term to use, not hard-code this
+        self.log("result", result)
+        return result
