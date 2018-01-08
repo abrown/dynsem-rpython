@@ -118,7 +118,6 @@ class Interpreter:
         jitdriver.can_enter_jit(term=term, rule=rule, interpreter=self)
         jitdriver.jit_merge_point(term=term, rule=rule, interpreter=self)
         term = promote(term)
-        rule = promote(rule)
         return self.transform_rule(term, rule)
 
     @unroll_safe
