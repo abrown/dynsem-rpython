@@ -152,6 +152,7 @@ class Interpreter:
         elif isinstance(rule.after, MapReadTerm):
             # TODO this relies on the same unchecked assumption as above
             resolved_key = context.resolve(rule.after.key)
+            assert isinstance(resolved_key, VarTerm)
             if resolved_key.index < 0:
                 resolved_key.index = self.environment.locate(resolved_key.name)
             return self.environment.get(resolved_key.index)

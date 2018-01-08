@@ -1,9 +1,23 @@
 from src.meta.printable import Printable
 
+ALL_FIELDS = [
+    'args[*]',
+    'assignments',
+    'index?',
+    'items[*]',
+    'key',
+    'map',
+    'name',
+    'number',
+    'rest',
+    'slot',
+    'trans?',
+    'vars[*]',
+]
+
 
 class Term(Printable):
-    _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
+    _immutable_fields_ = ALL_FIELDS
 
     def __init__(self):
         pass
@@ -37,8 +51,7 @@ class Term(Printable):
 
 # TODO refactor this into ListTerm
 class ApplTerm(Term):
-    _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key', 'trans?']
+    _immutable_fields_ = ALL_FIELDS
 
     def __init__(self, name, args=None, trans=None, bound_terms=None):
         Term.__init__(self)
@@ -74,8 +87,7 @@ class ApplTerm(Term):
 
 
 class ListTerm(Term):
-    _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
+    _immutable_fields_ = ALL_FIELDS
 
     def __init__(self, items=None):
         Term.__init__(self)
@@ -108,8 +120,7 @@ class ListTerm(Term):
 
 
 class ListPatternTerm(Term):
-    _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
+    _immutable_fields_ = ALL_FIELDS
 
     def __init__(self, vars=None, rest=None):
         Term.__init__(self)
@@ -133,8 +144,7 @@ class ListPatternTerm(Term):
 
 
 class IntTerm(Term):
-    _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
+    _immutable_fields_ = ALL_FIELDS
 
     def __init__(self, value):
         Term.__init__(self)
@@ -151,8 +161,7 @@ class IntTerm(Term):
 
 
 class VarTerm(Term):
-    _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
+    _immutable_fields_ = ALL_FIELDS
 
     def __init__(self, name, slot=-1, index=-1):
         Term.__init__(self)
@@ -171,8 +180,7 @@ class VarTerm(Term):
 
 
 class MapWriteTerm(Term):
-    _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
+    _immutable_fields_ = ALL_FIELDS
 
     def __init__(self, assignments=None):
         Term.__init__(self)
@@ -200,8 +208,7 @@ class MapWriteTerm(Term):
 
 
 class MapReadTerm(Term):
-    _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
+    _immutable_fields_ = ALL_FIELDS
 
     def __init__(self, map, key):
         Term.__init__(self)
