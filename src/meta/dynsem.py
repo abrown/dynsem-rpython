@@ -54,7 +54,7 @@ class Transformation(Printable):
 
 
 class Rule(Transformation):
-    _immutable_fields_ = ['before', 'after', 'components[*]', 'premises[*]']
+    _immutable_fields_ = ['before', 'after', 'components[*]', 'premises[*]', 'number_of_bound_terms', 'has_loop']
 
     def __init__(self, before, after, components=None, premises=None, number_of_bound_terms=0, has_loop=False):
         Transformation.__init__(self, before, number_of_bound_terms)
@@ -75,7 +75,7 @@ class Rule(Transformation):
 
 
 class NativeFunction(Transformation):
-    _immutable_fields_ = ['before', 'action']
+    _immutable_fields_ = ['before', 'action', 'number_of_bound_terms']
 
     def __init__(self, before, action, number_of_bound_terms=2):
         Transformation.__init__(self, before, number_of_bound_terms)
