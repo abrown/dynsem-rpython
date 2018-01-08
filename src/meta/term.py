@@ -38,7 +38,7 @@ class Term(Printable):
 # TODO refactor this into ListTerm
 class ApplTerm(Term):
     _immutable_fields_ = ['name', 'args[*]', 'items[*]', 'vars[*]', 'rest', 'number', 'slot', 'assignments', 'map',
-                         'key']
+                         'key', 'trans?']
 
     def __init__(self, name, args=None, trans=None, bound_terms=None):
         Term.__init__(self)
