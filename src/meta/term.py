@@ -56,7 +56,7 @@ class ApplTerm(Term):
     def __init__(self, name, args=None, trans=None, bound_terms=None):
         Term.__init__(self)
         self.name = name
-        self.args = args if args else []
+        self.args = list(args) if args else []
         self.trans = trans  # caches a matched transformation for this term
         self.bound_terms = bound_terms  # caches the built context for the transformation matching this term
 
