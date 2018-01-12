@@ -52,6 +52,10 @@ run-while: bin/e2
 show-last-log:
 	less -N $(shell ls e2-*.log | tail -n 1)
 
+# e.g. `make extract-last-log PATTERN=jit-log-opt-loop`
+extract-last-log:
+	cat $(shell ls e2-*.log | tail -n 1) | node src/util/extract-log-section.js ${PATTERN}
+
 disassemble: e2.log
 	PYTHONPATH=3rd/pypy 3rd/pypy/rpython/jit/backend/tool/viewcode.py $<
 	# note: his requires `dot` from graphviz (e.g. dnf install graphviz) and pygame (e.g. pip install pygame)
