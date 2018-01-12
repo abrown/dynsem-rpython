@@ -53,12 +53,11 @@ class Term(Printable):
 class ApplTerm(Term):
     _immutable_fields_ = ALL_FIELDS
 
-    def __init__(self, name, args=None, trans=None, bound_terms=None):
+    def __init__(self, name, args=None, trans=None):
         Term.__init__(self)
         self.name = name
         self.args = list(args) if args else []
         self.trans = trans  # caches a matched transformation for this term
-        self.bound_terms = bound_terms  # caches the built context for the transformation matching this term
 
     def walk(self, visitor, accumulator=None):
         return visitor(self, accumulator) or self.walk_list(self.args, visitor, accumulator)

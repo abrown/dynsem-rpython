@@ -122,7 +122,7 @@ class Interpreter:
 
     @unroll_safe
     def transform_rule(self, term, rule):
-        context = Context(term, rule.number_of_bound_terms)
+        context = Context(rule.number_of_bound_terms)
         # for component in rule.components:
         # context.bind(component, self.environment)
         # TODO re-enable when we can bind the environment name to the context
@@ -204,7 +204,7 @@ class Interpreter:
 
     @unroll_safe
     def transform_native_function(self, term, native_function):
-        context = Context(term, native_function.number_of_bound_terms)
+        context = Context(native_function.number_of_bound_terms)
         context.bind(native_function.before, term)
         self.log("context", context)
 
@@ -222,6 +222,7 @@ class Interpreter:
             args.append(0)
         tuple_args = (args[0], args[1])  # TODO RPython demands this
 
-        result = IntTerm(native_function.action(*tuple_args))  # TODO need to determine what type of term to use, not hard-code this
+        result = IntTerm(
+            native_function.action(*tuple_args))  # TODO need to determine what type of term to use, not hard-code this
         self.log("result", result)
         return result

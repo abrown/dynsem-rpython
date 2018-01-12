@@ -19,12 +19,10 @@ class ContextError(Exception):
 
 
 class Context(Printable):
-    _immutable_ = True
+    _immutable_fields_ = ['bound_terms[*]']
 
-    def __init__(self, appl_term, number_of_bound_terms):
-        if appl_term.bound_terms is None:
-            appl_term.bound_terms = [None] * number_of_bound_terms
-        self.bound_terms = appl_term.bound_terms
+    def __init__(self, number_of_bound_terms):
+        self.bound_terms = [None] * number_of_bound_terms
 
     @unroll_safe
     def bind(self, pattern, term):
@@ -75,7 +73,7 @@ class Context(Printable):
                 continue  # special case for empty lists; TODO should we dispose of empty lists like this?
             else:
                 resolved_args.append(resolved_arg)
-        return ApplTerm(term.name, resolved_args, term.trans, term.bound_terms)
+        return ApplTerm(term.name, resolved_args, term.trans)
 
     @unroll_safe
     def __resolve_list(self, term):

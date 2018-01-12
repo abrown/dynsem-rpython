@@ -12,7 +12,7 @@ class TestContext(unittest.TestCase):
         # need to do this here because slot assignments are made at the rule level
         number_of_bound_terms = SlotAssigner().assign_term(self.term1)
 
-        self.sut = Context(self.term1, number_of_bound_terms)
+        self.sut = Context(number_of_bound_terms)
 
         self.term2 = Parser.term(term2)
         self.sut.bind(self.term1, self.term2)
