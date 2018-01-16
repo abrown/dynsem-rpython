@@ -103,16 +103,16 @@ class Interpreter:
             self.nesting -= 1
         return term
 
+    @elidable
     def find_transformation(self, term):
-        for rule in self.module.rules:
-            if rule.matches(term):
-                return rule
-        for native in self.module.native_functions:
-            if native.matches(term):
-                return native
+        assert isinstance(term, ApplTerm)
+        found = self.module.lookup.get(term.name, [])
+        for transformation in found:
+            if transformation.matches(term):
+                return transformation
         return None
 
-    # not sure if I want to: @unroll_safe
+    @unroll_safe
     def transform_looping_rule(self, term, rule):
         self.log("looping", rule)
         jitdriver.can_enter_jit(term=term, rule=rule, interpreter=self)

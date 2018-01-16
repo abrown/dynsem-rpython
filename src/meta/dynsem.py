@@ -25,11 +25,23 @@ class ModuleBuilder:
 
 
 class Module:
-    _immutable_fields_ = ['rules[*]', 'native_functions[*]']
+    _immutable_fields_ = ['rules[*]', 'native_functions[*]', 'lookup']
 
     def __init__(self, rules=None, native_functions=None):
         self.rules = rules if rules else []
         self.native_functions = native_functions if native_functions else []
+        self.lookup = {}
+        for rule in self.rules:
+            self.__add(rule)
+        for native in self.native_functions:
+            self.__add(native)
+
+    def __add(self, transformation):
+        assert isinstance(transformation, Transformation)
+        if transformation.before.name in self.lookup:
+            self.lookup[transformation.before.name].append(transformation)
+        else:
+            self.lookup[transformation.before.name] = [transformation]
 
 
 class Transformation(Printable):
