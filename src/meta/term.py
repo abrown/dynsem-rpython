@@ -218,4 +218,4 @@ class MapReadTerm(Term):
         return visitor(self.map, accumulator) or visitor(self.key, accumulator)
 
     def to_string(self):
-        return "%s[%s]" % (self.map, self.key)
+        return "%s[%s]" % (self.map.to_string(), self.key.to_string())
