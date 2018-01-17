@@ -77,22 +77,17 @@ class Interpreter:
         while term is not None and isinstance(term, ApplTerm):
             self.log("term", term)
 
-            if not term.trans:
-                # TODO this may not work when the term has to match more than one rule
-                term.trans = self.find_transformation(term)
-            else:
-                self.log("found cached rule on", term)
-
-            transformation = term.trans
+            transformation = self.find_transformation(term)
             if transformation is None:
                 self.log("no transformation found, returning", term)
                 break  # unable to transform this appl, must be terminal
             elif isinstance(transformation, Rule):
-                self.log("rule", transformation)
                 if transformation.has_loop:
-                    term = self.transform_looping_rule(term, transformation)
-                else:
-                    term = self.transform_rule(term, transformation)
+                    self.log("looping", transformation)
+                    jitdriver.can_enter_jit(term=term, rule=transformation, interpreter=self)
+                    jitdriver.jit_merge_point(term=term, rule=transformation, interpreter=self)
+                self.log("rule", transformation)
+                term = self.transform_rule(term, transformation)
             elif isinstance(transformation, NativeFunction):
                 self.log("native", transformation)
                 term = self.transform_native_function(term, transformation)
@@ -113,15 +108,8 @@ class Interpreter:
         return None
 
     @unroll_safe
-    def transform_looping_rule(self, term, rule):
-        self.log("looping", rule)
-        jitdriver.can_enter_jit(term=term, rule=rule, interpreter=self)
-        jitdriver.jit_merge_point(term=term, rule=rule, interpreter=self)
-        term = promote(term)
-        return self.transform_rule(term, rule)
-
-    @unroll_safe
     def transform_rule(self, term, rule):
+        term = promote(term)
         context = Context(rule.number_of_bound_terms)
         # for component in rule.components:
         # context.bind(component, self.environment)
@@ -204,6 +192,7 @@ class Interpreter:
 
     @unroll_safe
     def transform_native_function(self, term, native_function):
+        term = promote(term)
         context = Context(native_function.number_of_bound_terms)
         context.bind(native_function.before, term)
         self.log("context", context)

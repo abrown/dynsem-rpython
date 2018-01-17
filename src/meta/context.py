@@ -73,7 +73,7 @@ class Context(Printable):
                 continue  # special case for empty lists; TODO should we dispose of empty lists like this?
             else:
                 resolved_args.append(resolved_arg)
-        return ApplTerm(term.name, resolved_args, term.trans)
+        return ApplTerm(term.name, resolved_args)
 
     @unroll_safe
     def __resolve_list(self, term):
