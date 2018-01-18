@@ -109,7 +109,6 @@ class Interpreter:
 
     @unroll_safe
     def transform_rule(self, term, rule):
-        term = promote(term)
         context = Context(rule.number_of_bound_terms)
         # for component in rule.components:
         # context.bind(component, self.environment)
@@ -192,7 +191,6 @@ class Interpreter:
 
     @unroll_safe
     def transform_native_function(self, term, native_function):
-        term = promote(term)
         context = Context(native_function.number_of_bound_terms)
         context.bind(native_function.before, term)
         self.log("context", context)
