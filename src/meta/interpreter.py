@@ -77,7 +77,7 @@ class Interpreter:
         while term is not None and isinstance(term, ApplTerm):
             self.log("term", term)
 
-            transformation = self.find_transformation(term)
+            transformation = promote(self.find_transformation(term))
             if transformation is None:
                 self.log("no transformation found, returning", term)
                 break  # unable to transform this appl, must be terminal
@@ -98,7 +98,7 @@ class Interpreter:
             self.nesting -= 1
         return term
 
-    @elidable
+    @unroll_safe
     def find_transformation(self, term):
         assert isinstance(term, ApplTerm)
         found = self.module.lookup.get(term.name, [])
