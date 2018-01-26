@@ -28,12 +28,11 @@ except ImportError:
         return func
 
 
-def get_location(rule, interpreter):
-    return "%s" % (rule.to_string())
+def get_location(hashed_term):
+    return "%d" % hashed_term
 
 
-# jitdriver = JitDriver(greens=['term', 'rule'], reds='auto', get_printable_location=get_location)
-jitdriver = JitDriver(greens=['rule', 'interpreter'], reds=['term'], get_printable_location=get_location)
+jitdriver = JitDriver(greens=['hashed_term'], reds='auto', get_printable_location=get_location)
 
 
 def jitpolicy(driver):
@@ -75,17 +74,18 @@ class Interpreter:
             self.nesting += 1
 
         while term is not None and isinstance(term, ApplTerm):
+            jitdriver.jit_merge_point(hashed_term=term.hash)
             self.log("term", term)
 
-            transformation = promote(self.find_transformation(term))
+            transformation = self.find_transformation(term)
             if transformation is None:
                 self.log("no transformation found, returning", term)
                 break  # unable to transform this appl, must be terminal
             elif isinstance(transformation, Rule):
                 if transformation.has_loop:
                     self.log("looping", transformation)
-                    jitdriver.can_enter_jit(term=term, rule=transformation, interpreter=self)
-                    jitdriver.jit_merge_point(term=term, rule=transformation, interpreter=self)
+                    # jitdriver.can_enter_jit(term=term, rule=transformation, interpreter=self)
+                    # jitdriver.can_enter_jit(term=term)
                 self.log("rule", transformation)
                 term = self.transform_rule(term, transformation)
             elif isinstance(transformation, NativeFunction):

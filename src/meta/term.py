@@ -1,8 +1,21 @@
 from src.meta.printable import Printable
 
+# So that you can still run this module under standard CPython...
+try:
+    from rpython.rlib.rarithmetic import r_uint
+    from rpython.rlib.objectmodel import compute_hash
+except ImportError:
+    class r_uint(int):
+        pass
+
+    def compute_hash(x):
+        return hash(x)
+
+
 ALL_FIELDS = [
     'args[*]',
     'assignments',
+    'hash',
     'index?',
     'items[*]',
     'key',
@@ -15,11 +28,19 @@ ALL_FIELDS = [
 ]
 
 
+def hash_terms(terms):
+    """Helper method for hashing a list of already-hashed Terms"""
+    hash = r_uint(0)
+    for term in terms:
+        hash += term.hash << 5
+    return hash
+
+
 class Term(Printable):
     _immutable_fields_ = ALL_FIELDS
 
     def __init__(self):
-        pass
+        self.hash = r_uint(-1)
 
     def walk(self, visitor, accumulator=None):
         return visitor(self, accumulator)
@@ -56,6 +77,7 @@ class ApplTerm(Term):
         Term.__init__(self)
         self.name = name
         self.args = list(args) if args else []
+        self.hash = r_uint(compute_hash(name)) + hash_terms(self.args)
 
     def walk(self, visitor, accumulator=None):
         return visitor(self, accumulator) or self.walk_list(self.args, visitor, accumulator)
@@ -89,6 +111,7 @@ class ListTerm(Term):
     def __init__(self, items=None):
         Term.__init__(self)
         self.items = list(items) if items else []
+        self.hash = hash_terms(self.items)
 
     def walk(self, visitor, accumulator=None):
         return self.walk_list(self.items, visitor, accumulator)
@@ -123,6 +146,7 @@ class ListPatternTerm(Term):
         Term.__init__(self)
         self.vars = list(vars) if vars else []
         self.rest = rest
+        self.hash = r_uint(compute_hash(rest)) + hash_terms(self.vars)
 
     def walk(self, visitor, accumulator=None):
         return self.walk_list(self.vars, visitor, accumulator) or visitor(self.rest, accumulator)
@@ -146,6 +170,7 @@ class IntTerm(Term):
     def __init__(self, value):
         Term.__init__(self)
         self.number = value
+        self.hash = r_uint(compute_hash(self.number))
 
     def equals(self, term):
         return isinstance(term, self.__class__) and self.number == term.number
@@ -165,6 +190,7 @@ class VarTerm(Term):
         self.name = name
         self.slot = slot
         self.index = index
+        self.hash = r_uint(compute_hash(self.name))
 
     def equals(self, term):
         return isinstance(term, self.__class__) and self.name == term.name
@@ -172,6 +198,7 @@ class VarTerm(Term):
     def to_string(self):
         return "%s#%d" % (self.name, self.slot)
 
+    # TODO is this used?
     def __hash__(self):
         return hash(self.name)
 
@@ -182,6 +209,7 @@ class MapWriteTerm(Term):
     def __init__(self, assignments=None):
         Term.__init__(self)
         self.assignments = assignments if assignments else {}
+        self.hash = hash_terms(self.assignments.keys()) + hash_terms(self.assignments.values())
 
     def walk(self, visitor, accumulator=None):
         result = None
@@ -211,6 +239,7 @@ class MapReadTerm(Term):
         Term.__init__(self)
         self.map = map  # the map name
         self.key = key  # the key to retrieve from it
+        self.hash = hash_terms([map, key])
 
     def walk(self, visitor, accumulator=None):
         return visitor(self.map, accumulator) or visitor(self.key, accumulator)

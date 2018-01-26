@@ -30,5 +30,12 @@ class TestTerm(unittest.TestCase):
 
         self.assertTrue(pattern.matches(list))
 
+    def test_hashing(self):
+        self.assertEquals(Parser.term("a"), Parser.term("a"))
+        self.assertNotEquals(Parser.term("a"), Parser.term("b"))
+        self.assertEquals(Parser.term("[1, a(b), {c |--> d}]"), Parser.term("[1, a(b), {c |--> d}]"))
+        self.assertNotEquals(Parser.term("hello(world)"), Parser.term("hello[world]"))
+
+
 if __name__ == '__main__':
     unittest.main()
