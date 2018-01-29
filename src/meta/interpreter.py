@@ -28,11 +28,11 @@ except ImportError:
         return func
 
 
-def get_location(hashed_term):
+def get_location(hashed_term, interpreter):
     return "%d" % hashed_term
 
 
-jitdriver = JitDriver(greens=['hashed_term'], reds='auto', get_printable_location=get_location)
+jitdriver = JitDriver(greens=['hashed_term', 'interpreter'], reds='auto', get_printable_location=get_location)
 
 
 def jitpolicy(driver):
@@ -56,8 +56,9 @@ class Interpreter:
     def __init__(self, dynsem_module, debug=0):
         self.environment = ListBackedMap()
         self.module = dynsem_module
-        self.debug = debug
+        self.debug = promote(debug)
         self.nesting = -1
+
 
     @unroll_safe
     def log(self, label, printable=None):
@@ -74,7 +75,7 @@ class Interpreter:
             self.nesting += 1
 
         while term is not None and isinstance(term, ApplTerm):
-            jitdriver.jit_merge_point(hashed_term=term.hash)
+            jitdriver.jit_merge_point(hashed_term=term.hash, interpreter=self)
             self.log("term", term)
 
             transformation = self.find_transformation(term)
