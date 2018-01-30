@@ -6,7 +6,7 @@ from src.meta.term import ApplTerm, MapReadTerm, MapWriteTerm, VarTerm, IntTerm
 
 # So that you can still run this module under standard CPython...
 try:
-    from rpython.rlib.jit import JitDriver, elidable, promote, unroll_safe
+    from rpython.rlib.jit import JitDriver, elidable, promote, unroll_safe, jit_debug, we_are_jitted
 except ImportError:
     class JitDriver(object):
         def __init__(self, **kw): pass
@@ -15,17 +15,20 @@ except ImportError:
 
         def can_enter_jit(self, **kw): pass
 
-
     def elidable(func):
         return func
-
 
     def promote(x):
         return x
 
-
     def unroll_safe(func):
         return func
+
+    def jit_debug(string, arg1=0, arg2=0, arg3=0, arg4=0):
+        pass
+
+    def we_are_jitted():
+        return False
 
 
 def get_location(hashed_term, interpreter):
@@ -58,7 +61,6 @@ class Interpreter:
         self.module = dynsem_module
         self.debug = promote(debug)
         self.nesting = -1
-
 
     @unroll_safe
     def log(self, label, printable=None):
@@ -100,7 +102,7 @@ class Interpreter:
             self.nesting -= 1
         return term
 
-    @unroll_safe
+    @elidable
     def find_transformation(self, term):
         assert isinstance(term, ApplTerm)
         found = self.module.lookup.get(term.name, [])
