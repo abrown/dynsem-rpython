@@ -79,21 +79,26 @@ class Interpreter:
         while term is not None and isinstance(term, ApplTerm):
             jitdriver.jit_merge_point(hashed_term=term.hash, interpreter=self)
             self.log("term", term)
+            jit_debug("term(arity)", len(term.args))
 
             transformation = self.find_transformation(term)
             transformation = promote(transformation)
             if transformation is None:
                 self.log("no transformation found, returning", term)
+                jit_debug("no transformation found, returning")
                 break  # unable to transform this appl, must be terminal
             elif isinstance(transformation, Rule):
                 if transformation.has_loop:
                     self.log("looping", transformation)
+                    jit_debug("looping")
                     # jitdriver.can_enter_jit(term=term, rule=transformation, interpreter=self)
                     # jitdriver.can_enter_jit(term=term)
                 self.log("rule", transformation)
+                jit_debug("rule(premises)", len(transformation.premises))
                 term = self.transform_rule(term, transformation)
             elif isinstance(transformation, NativeFunction):
                 self.log("native", transformation)
+                jit_debug("native")
                 term = self.transform_native_function(term, transformation)
             else:
                 raise NotImplementedError()
