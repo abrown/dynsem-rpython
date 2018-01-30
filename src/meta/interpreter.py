@@ -116,6 +116,7 @@ class Interpreter:
 
     @unroll_safe
     def transform_rule(self, term, rule):
+        rule = promote(rule)
         context = Context(rule.number_of_bound_terms)
         # for component in rule.components:
         # context.bind(component, self.environment)
