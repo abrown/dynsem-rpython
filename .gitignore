@@ -3,3 +3,4 @@ bin
 *.log
 .idea/workspace.xml
 .idea/misc.xml
+.cache
