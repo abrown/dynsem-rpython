@@ -31,11 +31,11 @@ except ImportError:
         return False
 
 
-def get_location(hashed_term, interpreter):
-    return "%d" % hashed_term
+def get_location(hashed_term, interpreter, rule):
+    return "%s" % rule.to_string()
 
 
-jitdriver = JitDriver(greens=['hashed_term', 'interpreter'], reds='auto', get_printable_location=get_location)
+jitdriver = JitDriver(greens=['hashed_term', 'interpreter', 'rule'], reds='auto', get_printable_location=get_location)
 
 
 def jitpolicy(driver):
@@ -89,7 +89,7 @@ class Interpreter:
             elif isinstance(transformation, Rule):
                 if transformation.has_loop:
                     self.log("looping", transformation)
-                    jitdriver.jit_merge_point(hashed_term=term.hash, interpreter=self)
+                    jitdriver.jit_merge_point(hashed_term=term.hash, interpreter=self, rule=transformation)
                     jit_debug("looping")
                 self.log("rule", transformation)
                 jit_debug("rule(premises)", len(transformation.premises))
