@@ -77,7 +77,6 @@ class Interpreter:
             self.nesting += 1
 
         while term is not None and isinstance(term, ApplTerm):
-            jitdriver.jit_merge_point(hashed_term=term.hash, interpreter=self)
             self.log("term", term)
             jit_debug("term(arity)", len(term.args))
 
@@ -90,9 +89,8 @@ class Interpreter:
             elif isinstance(transformation, Rule):
                 if transformation.has_loop:
                     self.log("looping", transformation)
+                    jitdriver.jit_merge_point(hashed_term=term.hash, interpreter=self)
                     jit_debug("looping")
-                    # jitdriver.can_enter_jit(term=term, rule=transformation, interpreter=self)
-                    # jitdriver.can_enter_jit(term=term)
                 self.log("rule", transformation)
                 jit_debug("rule(premises)", len(transformation.premises))
                 term = self.transform_rule(term, transformation)
