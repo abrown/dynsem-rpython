@@ -79,6 +79,7 @@ class Interpreter:
             self.log("term", term)
 
             transformation = self.find_transformation(term)
+            transformation = promote(transformation)
             if transformation is None:
                 self.log("no transformation found, returning", term)
                 break  # unable to transform this appl, must be terminal
