@@ -51,7 +51,7 @@ class InterpreterError(Exception):
 
 
 class Interpreter:
-    _immutable_fields_ = ['module', 'debug']
+    _immutable_fields_ = ['module', 'debug', 'environment']
 
     def __init__(self, dynsem_module, debug=0):
         self.environment = ListBackedMap()
