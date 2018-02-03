@@ -31,11 +31,11 @@ except ImportError:
         return False
 
 
-def get_location(hashed_term, interpreter, rule):
-    return "%s" % rule.to_string()
+def get_location(hashed_term, interpreter):
+    return "%d" % hashed_term
 
 
-jitdriver = JitDriver(greens=['hashed_term', 'interpreter', 'rule'], reds='auto', get_printable_location=get_location)
+jitdriver = JitDriver(greens=['hashed_term', 'interpreter'], reds=['term'], get_printable_location=get_location)
 
 
 def jitpolicy(driver):
@@ -77,6 +77,7 @@ class Interpreter:
             self.nesting += 1
 
         while term is not None and isinstance(term, ApplTerm):
+            jitdriver.jit_merge_point(hashed_term=term.hash, interpreter=self, term=term)
             self.log("term", term)
             jit_debug("term(arity)", len(term.args))
 
@@ -87,13 +88,13 @@ class Interpreter:
                 jit_debug("no transformation found, returning")
                 break  # unable to transform this appl, must be terminal
             elif isinstance(transformation, Rule):
-                if transformation.has_loop:
-                    self.log("looping", transformation)
-                    jitdriver.jit_merge_point(hashed_term=term.hash, interpreter=self, rule=transformation)
-                    jit_debug("looping")
                 self.log("rule", transformation)
                 jit_debug("rule(premises)", len(transformation.premises))
                 term = self.transform_rule(term, transformation)
+                if transformation.has_loop:
+                    self.log("looping", transformation)
+                    jit_debug("looping")
+                    jitdriver.can_enter_jit(hashed_term=term.hash, interpreter=self, term=term)
             elif isinstance(transformation, NativeFunction):
                 self.log("native", transformation)
                 jit_debug("native")
