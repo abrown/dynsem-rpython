@@ -78,6 +78,7 @@ class ApplTerm(Term):
         self.name = name
         self.args = list(args) if args else []
         self.hash = r_uint(compute_hash(name)) + hash_terms(self.args)
+        self.has_loop = False
 
     def walk(self, visitor, accumulator=None):
         return visitor(self, accumulator) or self.walk_list(self.args, visitor, accumulator)

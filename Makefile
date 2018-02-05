@@ -30,6 +30,10 @@ bin/e2: src/main/e2.py $(shell find src/meta/*.py)
 	mkdir -p bin
 	PYTHONPATH=. python ${RPYTHON} --log --opt=${JIT_OPT} --output=$@ $<
 
+bin/e2-handmade: src/main/e2-handmade.py $(shell find src/compile/*.py) $(shell find src/meta/*.py)
+	mkdir -p bin
+	PYTHONPATH=. python ${RPYTHON} --lldebug --log --opt=${JIT_OPT} --output=$@ $<
+
 bin/while: src/main/while.py $(shell find src/meta/*.py) clean-pyc
 	mkdir -p bin
 	PYTHONPATH=. python ${RPYTHON} --log --opt=${JIT_OPT} --output=$@ $<
@@ -38,6 +42,9 @@ bin/sumprimes: src/main/sumprimes.c
 	gcc -O0 $< -o $@
 
 run: bin/e2
+	PYPYLOG=jit:${LOG} time $< src/main/sumprimes.e2
+
+run-handmade: bin/e2-handmade
 	PYPYLOG=jit:${LOG} time $< src/main/sumprimes.e2
 
 run-pypy: src/main/sumprimes.py
