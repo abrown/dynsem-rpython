@@ -73,12 +73,12 @@ class Term(Printable):
 class ApplTerm(Term):
     _immutable_fields_ = ALL_FIELDS
 
-    def __init__(self, name, args=None):
+    def __init__(self, name, args=None, has_loop=False):
         Term.__init__(self)
         self.name = name
         self.args = list(args) if args else []
         self.hash = r_uint(compute_hash(name)) + hash_terms(self.args)
-        self.has_loop = False
+        self.has_loop = has_loop
 
     def walk(self, visitor, accumulator=None):
         return visitor(self, accumulator) or self.walk_list(self.args, visitor, accumulator)

@@ -90,7 +90,7 @@ class Interpreter:
                 cond = term.args[0]
                 then = term.args[2]
                 ignored = self.interpret(then)
-                return ApplTerm('while', [cond, then])
+                return ApplTerm('while', [cond, then], True)
         elif term.name == 'block':
             # block([x | xs]) --> block(xs) where x --> y
             if len(term.args) == 0:
