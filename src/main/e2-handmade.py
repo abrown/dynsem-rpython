@@ -40,8 +40,7 @@ def main(argv):
         pass
 
     # run the program
-    result = Interpreter(debug_level).interpret(program)
-    print(result.to_string())
+    Interpreter(debug_level).interpret(program)
 
     return 0
 

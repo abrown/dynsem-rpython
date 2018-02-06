@@ -136,7 +136,7 @@ class Interpreter:
         elif term.name == 'write':
             # native
             s = self.interpret(term.args[0])
-            print(s)
+            print(s.to_string())
             return IntTerm(0)
         elif term.name == 'add':
             # native
