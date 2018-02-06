@@ -32,7 +32,7 @@ bin/e2: src/main/e2.py $(shell find src/meta/*.py)
 
 bin/e2-handmade: src/main/e2-handmade.py $(shell find src/compile/*.py) $(shell find src/meta/*.py)
 	mkdir -p bin
-	PYTHONPATH=. python ${RPYTHON} --lldebug --log --opt=${JIT_OPT} --output=$@ $<
+	PYTHONPATH=. python ${RPYTHON} --log --opt=${JIT_OPT} --output=$@ $<
 
 bin/while: src/main/while.py $(shell find src/meta/*.py) clean-pyc
 	mkdir -p bin
