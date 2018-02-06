@@ -5,6 +5,7 @@ from src.meta.term import ApplTerm, IntTerm, ListTerm, VarTerm
 try:
     from rpython.rlib.jit import JitDriver, elidable, promote, unroll_safe, jit_debug, we_are_jitted
     from rpython.rlib.objectmodel import compute_hash
+    from rpython.rlib.rarithmetic import r_uint
 except ImportError:
     class JitDriver(object):
         def __init__(self, **kw): pass
@@ -38,6 +39,10 @@ except ImportError:
         return hash(x)
 
 
+    class r_uint(int):
+        pass
+
+
 def get_location(hashed_term, interpreter):
     return "%d" % hashed_term
 
@@ -51,6 +56,20 @@ def jitpolicy(driver):
         return JitPolicy()
     except ImportError:
         raise NotImplemented("Abandon if we are unable to use RPython's JitPolicy")
+
+
+WHILE = r_uint(compute_hash('while'))
+WHILE2 = r_uint(compute_hash('while2'))
+BLOCK = r_uint(compute_hash('block'))
+ASSIGN = r_uint(compute_hash('assign'))
+RETRIEVE = r_uint(compute_hash('retrieve'))
+IFZ = r_uint(compute_hash('ifz'))
+WRITE = r_uint(compute_hash('write'))
+ADD = r_uint(compute_hash('add'))
+SUB = r_uint(compute_hash('sub'))
+MUL = r_uint(compute_hash('mul'))
+DIV = r_uint(compute_hash('div'))
+LEQ = r_uint(compute_hash('leq'))
 
 
 class Interpreter:
@@ -75,13 +94,13 @@ class Interpreter:
         return term
 
     def eval(self, term):
-        if term.name == 'while':
+        if term.name_hash == WHILE:
             # while(cond, then) --> while2(cond, value, then) where cond --> value
             cond = term.args[0]
             then = term.args[1]
             value = self.interpret(cond)
-            return ApplTerm('while2', [cond, value, then])
-        elif term.name == 'while2':
+            return ApplTerm('while2', [cond, value, then], WHILE2)
+        elif term.name_hash == WHILE2:
             if term.args[1].number == 0:
                 # while2(cond, 0, then) --> 0
                 return IntTerm(0)
@@ -90,8 +109,8 @@ class Interpreter:
                 cond = term.args[0]
                 then = term.args[2]
                 ignored = self.interpret(then)
-                return ApplTerm('while', [cond, then], True)
-        elif term.name == 'block':
+                return ApplTerm('while', [cond, then], WHILE, True)
+        elif term.name_hash == BLOCK:
             # block([x | xs]) --> block(xs) where x --> y
             if len(term.args) == 0:
                 return None
@@ -102,11 +121,11 @@ class Interpreter:
             x = list.items[0]
             y = self.interpret(x)
             if len(list.items) == 1:
-                return ApplTerm('block', [ListTerm()])
+                return ApplTerm('block', [ListTerm()], BLOCK)
             else:
                 xs = list.items[1:]
-                return ApplTerm('block', [ListTerm(xs)])
-        elif term.name == 'assign':
+                return ApplTerm('block', [ListTerm(xs)], BLOCK)
+        elif term.name_hash == ASSIGN:
             # E |- assign(x, v) --> {x |--> v, E}
             x = term.args[0]
             assert isinstance(x, VarTerm)
@@ -115,14 +134,14 @@ class Interpreter:
                 x.index = self.environment.locate(x.name)
             self.environment.put(x.index, v)
             return IntTerm(0)
-        elif term.name == 'retrieve':
+        elif term.name_hash == RETRIEVE:
             # E |- retrieve(x) --> E[x]
             x = term.args[0]
             assert isinstance(x, VarTerm)
             if x.index < 0:
                 x.index = self.environment.locate(x.name)
             return self.environment.get(x.index)
-        elif term.name == 'ifz':
+        elif term.name_hash == IFZ:
             # ifz(cond, then, else) --> result where cond --> cond2; case cond2 of {0 => result => else otherwise => result => then}
             cond = term.args[0]
             then = term.args[1]
@@ -133,36 +152,36 @@ class Interpreter:
             else:
                 result = else_
             return result
-        elif term.name == 'write':
+        elif term.name_hash == WRITE:
             # native
             s = self.interpret(term.args[0])
             print(s.to_string())
             return IntTerm(0)
-        elif term.name == 'add':
+        elif term.name_hash == ADD:
             # native
             x = self.interpret(term.args[0])
             y = self.interpret(term.args[1])
             z = x.number + y.number
             return IntTerm(z)
-        elif term.name == 'sub':
+        elif term.name_hash == SUB:
             # native
             x = self.interpret(term.args[0])
             y = self.interpret(term.args[1])
             z = x.number - y.number
             return IntTerm(z)
-        elif term.name == 'mul':
+        elif term.name_hash == MUL:
             # native
             x = self.interpret(term.args[0])
             y = self.interpret(term.args[1])
             z = x.number * y.number
             return IntTerm(z)
-        elif term.name == 'div':
+        elif term.name_hash == DIV:
             # native
             x = self.interpret(term.args[0])
             y = self.interpret(term.args[1])
             z = x.number // y.number
             return IntTerm(z)
-        elif term.name == 'leq':
+        elif term.name_hash == LEQ:
             # native
             x = self.interpret(term.args[0])
             y = self.interpret(term.args[1])

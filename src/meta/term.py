@@ -21,6 +21,7 @@ ALL_FIELDS = [
     'key',
     'map',
     'name',
+    'name_hash',
     'number',
     'rest',
     'slot',
@@ -73,11 +74,12 @@ class Term(Printable):
 class ApplTerm(Term):
     _immutable_fields_ = ALL_FIELDS
 
-    def __init__(self, name, args=None, has_loop=False):
+    def __init__(self, name, args=None, name_hash=0, has_loop=False):
         Term.__init__(self)
         self.name = name
         self.args = list(args) if args else []
-        self.hash = r_uint(compute_hash(name)) + hash_terms(self.args)
+        self.name_hash = name_hash if name_hash != 0 else r_uint(compute_hash(name))
+        self.hash = self.name_hash + hash_terms(self.args)
         self.has_loop = has_loop
 
     def walk(self, visitor, accumulator=None):
