@@ -25,6 +25,7 @@ all: test
 
 test:
 	python -m unittest discover -s src/meta/test -p "*.py" -t .
+	python -m unittest discover -s src/compile/test -p "*.py" -t .
 
 bin/e2: src/main/e2.py $(shell find src/meta/*.py)
 	mkdir -p bin

@@ -72,7 +72,8 @@ class Compiler:
 
         for premise in rule.premises:
             if isinstance(premise, EqualityCheckPremise):
-                retrieve
+                pass
+
         return tree
 
     @staticmethod

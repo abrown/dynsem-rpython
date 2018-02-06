@@ -11,3 +11,8 @@ matrix:
         - make bin/e2
         - make run
         - cat e2-*.log
+    - language: c
+      script:
+        - make bin/e2-handmade
+        - make run-handmade
+        - cat e2-*.log
