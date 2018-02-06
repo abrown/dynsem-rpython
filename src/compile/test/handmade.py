@@ -66,7 +66,7 @@ class TestInterpreter(unittest.TestCase):
         program = """
         /* sum up all primes in [2..max], using inefficient algorithm from lecture 1. */
         block([
-          assign(max, 100),
+          assign(max, 50),
           assign(s, 0),
           assign(n, 2),
           while(leq(retrieve(n), retrieve(max)),
@@ -99,7 +99,7 @@ class TestInterpreter(unittest.TestCase):
         result = interpreter.interpret(Parser.term(program))
 
         self.assertEqual(None, result)
-        self.assertEqual(5047, interpreter.environment.locate_and_get('s').number)
+        self.assertEqual(328, interpreter.environment.locate_and_get('s').number)
 
 
 if __name__ == '__main__':
