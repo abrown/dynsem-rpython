@@ -135,6 +135,7 @@ class Interpreter:
             if x.index < 0:
                 x.index = self.environment.locate(x.name)
             self.environment.put(x.index, v)
+            # print("\tassign %s := %s" % (x.to_string(), v.to_string()))
             return IntTerm(0)
         elif term.name_hash == RETRIEVE:
             # E |- retrieve(x) --> E[x]
@@ -142,6 +143,7 @@ class Interpreter:
             assert isinstance(x, VarTerm)
             if x.index < 0:
                 x.index = self.environment.locate(x.name)
+            # print("\tretrieve %s := %s" % (x.to_string(), self.environment.get(x.index).to_string()))
             return self.environment.get(x.index)
         elif term.name_hash == IFZ:
             # ifz(cond, then, else) --> result where cond --> cond2; case cond2 of {0 => result => else otherwise => result => then}
@@ -150,9 +152,9 @@ class Interpreter:
             else_ = term.args[2]
             cond_ = self.interpret(cond)
             if cond_.number == 0:
-                result = then
-            else:
                 result = else_
+            else:
+                result = then
             return result
         elif term.name_hash == WRITE:
             # native
@@ -164,30 +166,35 @@ class Interpreter:
             x = self.interpret(term.args[0])
             y = self.interpret(term.args[1])
             z = x.number + y.number
+            # print("\t%d + %d = %d" % (x.number, y.number, z))
             return IntTerm(z)
         elif term.name_hash == SUB:
             # native
             x = self.interpret(term.args[0])
             y = self.interpret(term.args[1])
             z = x.number - y.number
+            # print("\t%d - %d = %d" % (x.number, y.number, z))
             return IntTerm(z)
         elif term.name_hash == MUL:
             # native
             x = self.interpret(term.args[0])
             y = self.interpret(term.args[1])
             z = x.number * y.number
+            # print("\t%d * %d = %d" % (x.number, y.number, z))
             return IntTerm(z)
         elif term.name_hash == DIV:
             # native
             x = self.interpret(term.args[0])
             y = self.interpret(term.args[1])
             z = x.number // y.number
+            # print("\t%d // %d = %d" % (x.number, y.number, z))
             return IntTerm(z)
         elif term.name_hash == LEQ:
             # native
             x = self.interpret(term.args[0])
             y = self.interpret(term.args[1])
             z = int(x.number <= y.number)
+            # print("\t%d <= %d = %d" % (x.number, y.number, z))
             return IntTerm(z)
         else:
             raise NotImplementedError

@@ -31,7 +31,7 @@ class TestInterpreter(unittest.TestCase):
 
         result = Interpreter().interpret(term)
 
-        self.assertEqual(IntTerm(99), result)
+        self.assertEqual(IntTerm(42), result)
 
     def test_block(self):
         term = Parser.term("block([1, 2, 3, 4])")
@@ -51,16 +51,16 @@ class TestInterpreter(unittest.TestCase):
         interpreter = Interpreter()
 
         result1 = interpreter.interpret(Parser.term("ifz(0, b, c)"))
-        self.assertEqual(VarTerm("b"), result1)
+        self.assertEqual(VarTerm("c"), result1)
 
         result2 = interpreter.interpret(Parser.term("ifz(1, b, c)"))
-        self.assertEqual(VarTerm("c"), result2)
+        self.assertEqual(VarTerm("b"), result2)
 
     def test_recursive_contexts(self):
         interpreter = Interpreter()
 
         result = interpreter.interpret(Parser.term("ifz(ifz(1, 2, 3), 4, 5)"))
-        self.assertEqual(IntTerm(5), result)
+        self.assertEqual(IntTerm(4), result)
 
     def test_sumprimes(self):
         program = """
