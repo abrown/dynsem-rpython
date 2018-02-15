@@ -89,6 +89,8 @@ class Interpreter:
             term = self.eval(term)
 
             if isinstance(term, ApplTerm) and term.has_loop:
+                if self.debug:
+                    print("looping")
                 jitdriver.can_enter_jit(hashed_term=term.hash, interpreter=self, term=term)
 
         return term
