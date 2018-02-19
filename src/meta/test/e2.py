@@ -8,7 +8,7 @@ from src.meta.term import ApplTerm, IntTerm
 
 class TestE2(unittest.TestCase):
     def test_if(self):
-        term = Parser.term("ifz(leq(2, 1), a(), b())")
+        term = Parser.term("if(leq(2, 1), a(), b())")
 
         result = Interpreter(e2).interpret(term)
 
@@ -69,14 +69,14 @@ class TestE2(unittest.TestCase):
               while(leq(retrieve(d), sub(retrieve(n), 1)),
                 block([           /* we have no mod operator... */
                   assign(m, mul(retrieve(d), div(retrieve(n), retrieve(d)))), 
-                  ifz(leq(retrieve(n), retrieve(m)),  /* always have m <= n */
+                  if(leq(retrieve(n), retrieve(m)),  /* always have m <= n */
                     assign(p, 0),  /* i.e., n = m, so d divides n, so set p false */
                     block()  /* (block) is a no-op */
                   ), 
                   assign(d, add(retrieve(d), 1))
                 ])
               ),
-              ifz(retrieve(p), 
+              if(retrieve(p), 
                 assign(s, add(retrieve(s), retrieve(n))), 
                 block()
               ),

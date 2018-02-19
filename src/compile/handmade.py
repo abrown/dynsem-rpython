@@ -63,7 +63,7 @@ WHILE2 = r_uint(compute_hash('while2'))
 BLOCK = r_uint(compute_hash('block'))
 ASSIGN = r_uint(compute_hash('assign'))
 RETRIEVE = r_uint(compute_hash('retrieve'))
-IFZ = r_uint(compute_hash('ifz'))
+IF = r_uint(compute_hash('if'))
 WRITE = r_uint(compute_hash('write'))
 ADD = r_uint(compute_hash('add'))
 SUB = r_uint(compute_hash('sub'))
@@ -128,8 +128,8 @@ class Interpreter:
                 if self.debug:
                     print("\tretrieve %s := %s" % (x.to_string(), self.environment.get(x.index).to_string()))
                 return self.environment.get(x.index)
-            elif term.name_hash == IFZ:
-                # ifz(cond, then, else) --> result where cond --> cond2; case cond2 of {0 => result => else otherwise => result => then}
+            elif term.name_hash == IF:
+                # if(cond, then, else) --> result where cond --> cond2; case cond2 of {0 => result => else otherwise => result => then}
                 cond = term.args[0]
                 then = term.args[1]
                 else_ = term.args[2]
