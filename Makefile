@@ -57,6 +57,17 @@ run-c: bin/sumprimes
 run-while: bin/e2
 	PYPYLOG=jit:${LOG} time $< src/main/while.e2
 
+ITERATIONS:=3
+benchmark: bin/sumprimes src/main/sumprimes.py bin/e2-handmade src/main/sumprimes.e2
+	echo 0 > /proc/sys/kernel/nmi_watchdog
+	perf stat -r ${ITERATIONS} -d bin/sumprimes
+	perf stat -r ${ITERATIONS} -d pypy src/main/sumprimes.py
+	perf stat -r ${ITERATIONS} -d bin/e2-handmade src/main/sumprimes.e2
+	echo 1 > /proc/sys/kernel/nmi_watchdog
+	/usr/bin/time bin/sumprimes
+	/usr/bin/time pypy src/main/sumprimes.py
+	/usr/bin/time bin/e2-handmade src/main/sumprimes.e2
+
 show-last-log:
 	less -N $(shell ls e2-*.log | tail -n 1)
 
