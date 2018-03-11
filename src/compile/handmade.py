@@ -83,6 +83,7 @@ class Interpreter:
         if self.debug > 1:
             print(term)
 
+        term = promote(term)
         while isinstance(term, ApplTerm):
             if term.name_hash == WHILE:
                 # while(cond, then) --> result where case cond { 0 => 0 => result, otherwise then --> ignored; while(cond, then) => result }
@@ -102,12 +103,13 @@ class Interpreter:
                     return None  # special block() case TODO remove
                 list = term.args[0]
                 assert isinstance(list, ListTerm)
-                if len(list.items) == 0:
-                    return None
-                x = list.items[0]
-                y = self.interpret(x)
-                new_term = ApplTerm(term.name, [ListTerm(list.items[1:])], term.name_hash)
-                return self.interpret(new_term)
+                items = list.items
+                # TODO is this a legitimate transformation?
+                while len(items) > 0:
+                    x = items[0]
+                    y = self.interpret(x)
+                    items = items[1:]
+                return None
             elif term.name_hash == ASSIGN:
                 # E |- assign(x, v) --> {x |--> v, E}
                 x = term.args[0]

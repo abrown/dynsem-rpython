@@ -1,6 +1,6 @@
 /* sum up all primes in [2..max], using inefficient algorithm from lecture 1. */
 block([
-  assign(max, 1000),
+  assign(max, 10000),
   assign(s, 0),
   assign(n, 2),
   while(leq(retrieve(n), retrieve(max)),
