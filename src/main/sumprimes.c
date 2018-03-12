@@ -1,7 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-int main () {
-    int max = 1000;
+int main (int argc, char **argv) {
+    int max = atoi(argv[1]);
     int s = 0;
     int n = 2;
 
