@@ -73,7 +73,7 @@ LEQ = r_uint(compute_hash('leq'))
 
 
 class Interpreter:
-    _immutable_fields_ = ['debug']
+    _immutable_fields_ = ['debug', 'environment']
 
     def __init__(self, debug=0):
         self.debug = debug

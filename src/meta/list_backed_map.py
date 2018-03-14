@@ -15,6 +15,8 @@ except ImportError:
 
 
 class ListBackedMap:
+    _immutable_fields_ = ['names', 'values']
+
     def __init__(self):
         self.names = {}
         self.values = []

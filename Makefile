@@ -93,7 +93,7 @@ run-while-handmade: bin/e2-handmade
 #
 TIME:=/usr/bin/time
 FORMAT:=
-MAX_PRIMES:=1 10 100 1000 10000 30000
+MAX_PRIMES:=1 10 100 1000 10000 100000
 benchmark: bin/sumprimes src/main/sumprimes.py bin/e2-handmade src/main/sumprimes.e2
 	@echo "[benchmark] & [max] & [total elapsed time] & [max resident memory]"
 	@for MAX in ${MAX_PRIMES}; do \
