@@ -45,6 +45,9 @@ bin/while: src/main/while.py $(shell find src/meta/*.py) clean-pyc
 	mkdir -p bin
 	PYTHONPATH=. python ${RPYTHON} --log --opt=${JIT_OPT} --output=$@ $<
 
+bin/while-c: src/main/while.c
+	gcc -O0 $< -o $@
+
 bin/sumprimes: src/main/sumprimes.c
 	gcc -O0 $< -o $@
 
@@ -86,6 +89,8 @@ run-while-pypy: src/main/while.py
 run-while-handmade: bin/e2-handmade
 	PYPYLOG=jit:${LOG} time $< src/main/while.e2
 
+run-while-c: bin/while-c
+	time $<
 
 #
 # BENCHMARK
